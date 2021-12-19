@@ -36,7 +36,7 @@ import {
   ALICORN_DEFAULT_THEME_LIGHT,
   isBgDark,
 } from "./Renderer";
-import { fullWidth, useFormStyles } from "./Stylex";
+import { useFormStyles } from "./Stylex";
 import { tr } from "./Translator";
 
 export const CANNOT_LOAD_INFO: JavaInfo = {
@@ -195,7 +195,7 @@ export function JavaSelector(): JSX.Element {
         >
           <IconButton
             color={"primary"}
-            sx={{ marginLeft: "1em" }}
+            sx={{ marginLeft: "1rem" }}
             onClick={() => {
               setLoaded(false);
             }}
@@ -343,7 +343,7 @@ function JavaDownloader(): JSX.Element {
                 }
               } else {
                 void shell.openExternal(
-                  "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/16/jre/x64/linux/"
+                  "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/17/jdk/x64/linux/"
                 );
                 submitInfo(tr("JavaSelector.External"));
                 setRunning(false);
@@ -375,7 +375,7 @@ function JavaDownloader(): JSX.Element {
                 }
               } else {
                 void shell.openExternal(
-                  "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/8/jre/x64/linux/"
+                  "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/8/jdk/x64/linux/"
                 );
                 submitInfo(tr("JavaSelector.External"));
                 setRunning(false);

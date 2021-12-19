@@ -1,14 +1,14 @@
-import { app, BrowserWindow, globalShortcut, screen } from "electron";
+import { app, BrowserWindow, globalShortcut, ipcMain, screen } from "electron";
 import { btoa } from "js-base64";
 import path from "path";
 import { DOH_CONFIGURE } from "../modules/commons/Constants";
 import {
   getBoolean,
+  getNumber,
   getString,
   loadConfigSync,
 } from "../modules/config/ConfigSupport";
 import { registerBackgroundListeners } from "./Background";
-import { closeWS, initWS } from "./WSServer";
 
 console.log("Starting Alicorn!");
 
@@ -43,6 +43,13 @@ process.on("SIGINT", () => {
   process.exit();
 });
 
+process.on("SIGTERM", () => {
+  if (READY_LOCK) {
+    app.releaseSingleInstanceLock();
+  }
+  process.exit();
+});
+
 process.on("exit", () => {
   if (READY_LOCK) {
     app.releaseSingleInstanceLock();
@@ -70,6 +77,8 @@ async function whenAppReady() {
       contextIsolation: false, // Node
       sandbox: false, // Node
       spellcheck: false,
+      zoomFactor: getNumber("theme.zoom-factor", 1.0),
+      defaultEncoding: "UTF-8",
     },
     frame: getString("frame.drag-impl") === "TitleBar",
     show: false,
@@ -79,10 +88,21 @@ async function whenAppReady() {
   console.log("Loading resources...");
   console.log("Registering event listeners...");
   registerBackgroundListeners();
-
-  mainWindow.once("ready-to-show", async () => {
+  let readyToClose = false;
+  ipcMain.once("allowShowWindow", () => {
     console.log("Opening window!");
     mainWindow?.show();
+  });
+  ipcMain.on("readyToClose", () => {
+    readyToClose = true;
+  });
+  mainWindow.on("close", (e) => {
+    if (!readyToClose) {
+      e.preventDefault();
+      mainWindow?.webContents.send("YouAreGoingToBeKilled");
+    }
+  });
+  mainWindow.once("ready-to-show", async () => {
     applyDoHSettings();
     console.log("Setting up proxy!");
     await initProxy();
@@ -99,7 +119,6 @@ async function whenAppReady() {
     }
   });
   mainWindow.once("closed", () => {
-    closeWS();
     console.log("Stopping!");
     setTimeout(() => {
       console.log("Too long! Forcefully stopping!");
@@ -129,10 +148,6 @@ async function whenAppReady() {
         mainWindow?.webContents.openDevTools();
       }
     });
-  }
-  if (getBoolean("system.ws-operation")) {
-    console.log("Preparing WS!");
-    initWS();
   }
   await mainWindow.loadFile(path.resolve(appPath, "Renderer.html"));
 }
@@ -199,7 +214,7 @@ function main() {
     try {
       console.log(e);
       await mainWindow?.webContents.loadFile("Error.html", {
-        hash: btoa(escape(String(e.message))),
+        hash: btoa(encodeURIComponent(String(e.message))),
       });
     } catch {}
   });

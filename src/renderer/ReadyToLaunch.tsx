@@ -1,13 +1,22 @@
 import {
+  Check,
+  DataObject,
+  Extension,
+  FindInPage,
+  Flag,
   FlashOn,
   FlightLand,
   FlightTakeoff,
+  Person,
   RssFeed,
+  SportsScore,
+  ViewModule,
 } from "@mui/icons-material";
 import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -24,6 +33,7 @@ import {
   RadioGroup,
   Select,
   Step,
+  StepIconProps,
   StepLabel,
   Stepper,
   TextField,
@@ -32,6 +42,7 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import copy from "copy-to-clipboard";
 import EventEmitter from "events";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -146,10 +157,10 @@ export const REBOOT_KEY_BASE = "ReadyToLaunch.Reboot.";
 const useStyles = makeStyles((theme: AlicornTheme) => ({
   stepper: {
     backgroundColor: theme.palette.secondary.light,
-    fontSize: "14px",
+    fontSize: "0.9rem",
   },
   textSP: {
-    fontSize: sessionStorage.getItem("smallFontSize") || "1em",
+    fontSize: sessionStorage.getItem("smallFontSize") || "1rem",
     color: theme.palette.secondary.main,
   },
   text: {
@@ -234,7 +245,14 @@ export function ReadyToLaunch(): JSX.Element {
     </Container>
   );
 }
-
+enum LaunchingStatus {
+  PENDING = "Pending",
+  ACCOUNT_AUTHING = "PerformingAuth",
+  FILES_FILLING = "CheckingFiles",
+  MODS_PREPARING = "PreparingMods",
+  ARGS_GENERATING = "GeneratingArgs",
+  FINISHED = "Finished",
+}
 const LAUNCH_STEPS = [
   "Pending",
   "PerformingAuth",
@@ -243,6 +261,63 @@ const LAUNCH_STEPS = [
   "GeneratingArgs",
   "Finished",
 ];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LAUNCH_STEPS_ICONS: Record<string, any> = {
+  1: <Flag fontSize={"small"} />,
+  2: <Person fontSize={"small"} />,
+  3: <FindInPage fontSize={"small"} />,
+  4: <Extension fontSize={"small"} />,
+  5: <DataObject fontSize={"small"} />,
+  6: <SportsScore fontSize={"small"} />,
+};
+
+function LaunchStepIconRoot(props: {
+  completed?: boolean;
+  active?: boolean;
+  children: React.ReactNode;
+  loading: boolean;
+}): JSX.Element {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        backgroundColor:
+          props.completed || props.active ? "primary.main" : "primary.light",
+        color: "secondary.light",
+        width: 32,
+        height: 32,
+        fontSize: 16,
+      }}
+    >
+      {props.completed ? (
+        <Check fontSize={"small"} />
+      ) : props.active && props.loading ? (
+        <CircularProgress size={"1rem"} sx={{ color: "secondary.light" }} />
+      ) : (
+        props.children
+      )}
+    </Box>
+  );
+}
+
+function LaunchStepIcon(props: StepIconProps): JSX.Element {
+  const { active, completed } = props;
+  const i = String(props.icon);
+  return (
+    <LaunchStepIconRoot
+      loading={i !== "6" && i !== "1"}
+      completed={completed}
+      active={active}
+    >
+      {LAUNCH_STEPS_ICONS[i]}
+    </LaunchStepIconRoot>
+  );
+}
+
 const REV_LAUNCH_STEPS = {
   Pending: 0,
   PerformingAuth: 1,
@@ -251,6 +326,7 @@ const REV_LAUNCH_STEPS = {
   GeneratingArgs: 4,
   Finished: 5,
 };
+
 function Launching(props: {
   profile: GameProfile;
   container: MinecraftContainer;
@@ -419,11 +495,15 @@ function Launching(props: {
       </Typography>
       <br />
 
-      <Stepper className={classes.stepper} activeStep={activeStep}>
+      <Stepper
+        alternativeLabel
+        className={classes.stepper}
+        activeStep={activeStep}
+      >
         {LAUNCH_STEPS.map((s) => {
           return (
             <Step key={s}>
-              <StepLabel>
+              <StepLabel StepIconComponent={LaunchStepIcon}>
                 <Typography className={classes.textSP + " smtxt"}>
                   {tr("ReadyToLaunch.Status.Short." + s)}
                 </Typography>
@@ -446,7 +526,7 @@ function Launching(props: {
               "ReadyToLaunch.Progress",
               `Current=${ws.inStack}`,
               `BufferMax=${getNumber("download.concurrent.max-tasks")}`,
-              `Pending=${ws.pending}`
+              `Pending=${ws.pending + ws.inStack}`
             )}
           </Typography>
         </>
@@ -870,15 +950,6 @@ async function startBoot(
   return GLOBAL_LAUNCH_TRACKER;
 }
 
-enum LaunchingStatus {
-  PENDING = "Pending",
-  ACCOUNT_AUTHING = "PerformingAuth",
-  FILES_FILLING = "CheckingFiles",
-  MODS_PREPARING = "PreparingMods",
-  ARGS_GENERATING = "GeneratingArgs",
-  FINISHED = "Finished",
-}
-
 const LAST_ACCOUNT_TAB_KEY = "ReadyToLaunch.LastSelectedAccountType";
 const LAST_YG_ACCOUNT_NAME = "ReadyToLaunch.LastSelectedYggdrasilName";
 function AccountChoose(props: {
@@ -1008,7 +1079,7 @@ function AccountChoose(props: {
                 }}
               >
                 <SkinDisplay3D skin={skinUrl} width={100} height={150} />
-                <Typography style={{ color: "gray", marginTop: "-0.25em" }}>
+                <Typography style={{ color: "gray", marginTop: "-0.25rem" }}>
                   {tr("AccountManager.SkinView3DShort")}
                 </Typography>
               </Box>
@@ -1025,7 +1096,7 @@ function AccountChoose(props: {
                 <SkinDisplay2D skin={skinUrl} />
                 <br />
                 <br />
-                <Typography style={{ color: "gray", marginTop: "2.625em" }}>
+                <Typography style={{ color: "gray", marginTop: "2.625rem" }}>
                   {tr("AccountManager.SkinView2DShort")}
                 </Typography>
               </Box>
@@ -1238,21 +1309,17 @@ function MiniJavaSelector(props: {
         isBgDark() ? ALICORN_DEFAULT_THEME_DARK : ALICORN_DEFAULT_THEME_LIGHT
       }
     >
-      <Box
-        className={classes.root}
-        style={{
-          marginTop: "0.3125em",
-        }}
-      >
+      <Box>
         <FormControl variant={"outlined"} fullWidth>
           <InputLabel id={"Select-JRE"} className={classes.label}>
             {tr("JavaSelector.SelectJava")}
           </InputLabel>
           <Select
+            startAdornment={<ViewModule />}
             label={tr("JavaSelector.SelectJava")}
             variant={"outlined"}
             labelId={"Select-JRE"}
-            sx={{ color: "primary.main" }}
+            sx={{ color: "primary.main", height: "2.5rem" }}
             color={"primary"}
             onChange={(e) => {
               const sj = String(e.target.value);
@@ -1347,7 +1414,13 @@ const LEGACY_VERSIONS = /^1\.([0-9]|1[0-2])([-.a-z].*?)?$/i;
 const MODERN_VERSIONS = /^1\.(17|[2-9][0-9])(\.)?[0-9]*?/i;
 const HIGH_VERSIONS = /^1\.(1[8-9]|[2-9][0-9])(\.)?[0-9]*?/i;
 
-function checkJMCompatibility(mv: string, jv: number): "OLD" | "NEW" | "OK" {
+function checkJMCompatibility(
+  mv: string,
+  jv: number
+): "OLD" | "NEW" | "OK" | "DANGEROUS" {
+  if (jv <= 7 && jv !== 0) {
+    return "DANGEROUS";
+  }
   if (LEGACY_VERSIONS.test(mv) && jv > 8) {
     return "NEW";
   }
@@ -1558,6 +1631,7 @@ function OpenWorldDialog(props: {
               );
               if (c.length === 6) {
                 setCode(c);
+                copy(c, { format: "text/plain" });
                 sessionStorage.setItem(CODE_KEY + props.port, c);
                 submitSucc(tr("ReadyToLaunch.HoofoffCodeRaw", `Code=${c}`));
                 setErr("");

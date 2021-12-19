@@ -1,3 +1,4 @@
+import { AllInbox, Inventory2, MergeType, Numbers } from "@mui/icons-material";
 import {
   Avatar,
   Box,
@@ -13,6 +14,7 @@ import {
   ThemeProvider,
   Typography,
 } from "@mui/material";
+import { EventEmitter } from "events";
 import React, { useEffect, useRef, useState } from "react";
 import { throttle } from "throttle-debounce";
 import { ALICORN_SEPARATOR, ReleaseType } from "../modules/commons/Constants";
@@ -55,17 +57,17 @@ import { Icons } from "./Icons";
 import { ShiftEle } from "./Instruction";
 import { submitSucc, submitWarn } from "./Message";
 import { FailedHint, OperatingHintCustom } from "./OperatingHint";
+import { pffInstall } from "./PffFront";
 import {
   ALICORN_DEFAULT_THEME_DARK,
   ALICORN_DEFAULT_THEME_LIGHT,
   isBgDark,
 } from "./Renderer";
-import { fullWidth, useFormStyles } from "./Stylex";
+import { useFormStyles } from "./Stylex";
 import { tr } from "./Translator";
 
 export function InstallCore(): JSX.Element {
   const classes = useFormStyles();
-  const fullWidthClasses = fullWidth();
   const [foundCores, setCores] = useState<string[]>([]);
   const isLoaded = useRef<boolean>(false);
   const mounted = useRef<boolean>();
@@ -206,7 +208,7 @@ export function InstallCore(): JSX.Element {
                     />
                   </Grid>
                   <Grid item>
-                    <Typography color={"primary"} sx={{ marginLeft: "0.25em" }}>
+                    <Typography color={"primary"} sx={{ marginLeft: "0.3rem" }}>
                       {tr("InstallCore.InstallMinecraft")}
                     </Typography>
                   </Grid>
@@ -224,7 +226,7 @@ export function InstallCore(): JSX.Element {
                     />
                   </Grid>
                   <Grid item>
-                    <Typography color={"primary"} sx={{ marginLeft: "0.25em" }}>
+                    <Typography color={"primary"} sx={{ marginLeft: "0.3rem" }}>
                       {tr("InstallCore.InstallForge")}
                     </Typography>
                   </Grid>
@@ -243,7 +245,7 @@ export function InstallCore(): JSX.Element {
                     />
                   </Grid>
                   <Grid item>
-                    <Typography color={"primary"} sx={{ marginLeft: "0.25em" }}>
+                    <Typography color={"primary"} sx={{ marginLeft: "0.3rem" }}>
                       {tr("InstallCore.InstallFabric")}
                     </Typography>
                   </Grid>
@@ -261,7 +263,7 @@ export function InstallCore(): JSX.Element {
                     />
                   </Grid>
                   <Grid item>
-                    <Typography color={"primary"} sx={{ marginLeft: "0.25em" }}>
+                    <Typography color={"primary"} sx={{ marginLeft: "0.3rem" }}>
                       {tr("InstallCore.InstallIris")}
                     </Typography>
                   </Grid>
@@ -285,6 +287,7 @@ export function InstallCore(): JSX.Element {
                 </InputLabel>
                 <ShiftEle name={"InstallCoreMinecraft"} bgfill>
                   <Select
+                    startAdornment={<MergeType />}
                     sx={{ color: "primary.main" }}
                     variant={"outlined"}
                     labelId={"CoreInstall-Mojang-SelectArch"}
@@ -322,6 +325,7 @@ export function InstallCore(): JSX.Element {
                 </InputLabel>
                 <ShiftEle name={"InstallCoreMinecraft"} bgfill>
                   <Select
+                    startAdornment={<Numbers />}
                     sx={{ color: "primary.main" }}
                     variant={"outlined"}
                     labelId={"CoreInstall-Mojang-SelectVersion"}
@@ -352,6 +356,7 @@ export function InstallCore(): JSX.Element {
                 </InputLabel>
                 <ShiftEle name={"InstallCoreMinecraft"} bgfill>
                   <Select
+                    startAdornment={<AllInbox />}
                     sx={{ color: "primary.main" }}
                     label={tr("InstallCore.TargetContainer")}
                     variant={"outlined"}
@@ -450,6 +455,8 @@ export function InstallCore(): JSX.Element {
                   {tr("InstallCore.ForgeBaseVersion")}
                 </InputLabel>
                 <Select
+                  sx={{ color: "primary.main" }}
+                  startAdornment={<Inventory2 />}
                   label={tr("InstallCore.ForgeBaseVersion")}
                   variant={"outlined"}
                   labelId={"CoreInstall-Forge-SelectBase"}
@@ -571,6 +578,8 @@ export function InstallCore(): JSX.Element {
                   {tr("InstallCore.FabricBaseVersion")}
                 </InputLabel>
                 <Select
+                  sx={{ color: "primary.main" }}
+                  startAdornment={<Inventory2 />}
                   label={tr("InstallCore.FabricBaseVersion")}
                   variant={"outlined"}
                   labelId={"CoreInstall-Fabric-SelectBase"}
@@ -637,38 +646,41 @@ export function InstallCore(): JSX.Element {
                     }
                     return;
                   }
-                  setProgressMsg(
-                    tr(
-                      "InstallCore.Progress.Fetching",
-                      `Loader=Fabric`,
-                      `MCV=${mcv}`
-                    )
-                  );
-                  const stat = await getFabricInstaller(u, ct);
-                  if (!stat) {
-                    if (mounted.current) {
-                      setOperating(false);
-                      setChangePageWarn(false);
-                      setFailed(true);
-                      setFailedMsg(
+
+                  const [stat2, fbapi] = await Promise.allSettled([
+                    (async () => {
+                      setProgressMsg(
                         tr(
-                          "InstallCore.Progress.FailedToDownload",
-                          `Loader=Fabric`
+                          "InstallCore.Progress.Fetching",
+                          `Loader=Fabric`,
+                          `MCV=${mcv}`
                         )
                       );
-                    }
-                    return;
-                  }
-                  setProgressMsg(tr("InstallCore.Progress.ExecutingFabric"));
+                      if (!(await getFabricInstaller(u, ct))) {
+                        return false;
+                      }
+                      setProgressMsg(
+                        tr("InstallCore.Progress.ExecutingFabric")
+                      );
+                      const s0 = await performFabricInstall(
+                        await getJavaRunnable(getDefaultJavaHome()),
+                        u,
+                        fbv,
+                        mcv,
+                        ct
+                      );
+                      await removeFabricInstaller(u, ct);
+                      return s0;
+                    })(),
+                    pffInstall(
+                      "@Modrinth:P7dR8mSH",
+                      ct,
+                      mcv,
+                      new EventEmitter(),
+                      4
+                    ),
+                  ]);
 
-                  const stat2 = await performFabricInstall(
-                    await getJavaRunnable(getDefaultJavaHome()),
-                    u,
-                    fbv,
-                    mcv,
-                    ct
-                  );
-                  await removeFabricInstaller(u, ct);
                   if (!stat2) {
                     if (mounted.current) {
                       setOperating(false);
@@ -677,6 +689,8 @@ export function InstallCore(): JSX.Element {
                       setFailedMsg(tr("InstallCore.Progress.CouldNotExecute"));
                     }
                     return;
+                  } else if (!fbapi) {
+                    submitWarn(tr("InstallCore.Fabric.FabricAPIFailed"));
                   }
                   updateFabricCores(!updateFabricCoresBit);
                   setProgressMsg("Done! Cleaning up files...");
@@ -707,6 +721,8 @@ export function InstallCore(): JSX.Element {
                   {tr("InstallCore.IrisBaseVersion")}
                 </InputLabel>
                 <Select
+                  startAdornment={<Inventory2 />}
+                  sx={{ color: "primary.main" }}
                   label={tr("InstallCore.IrisBaseVersion")}
                   variant={"outlined"}
                   labelId={"CoreInstall-Iris-SelectBase"}
@@ -760,7 +776,9 @@ export function InstallCore(): JSX.Element {
                           selectedIrisContainer
                         )}/${encodeURIComponent(
                           prof.baseVersion
-                        )}/Fabric/iris-shaders/1`
+                        )}/Fabric/${encodeURIComponent(
+                          "@Modrinth:YL57xq9U @Modrinth:AANobbMI?"
+                        )}/1`
                       );
                       triggerSetPage("PffFront");
                     }

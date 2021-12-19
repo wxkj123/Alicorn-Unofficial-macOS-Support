@@ -2,15 +2,16 @@ import {
   AccountCircle,
   AllInbox,
   ArrowBack,
-  Build,
   Code,
   Dns,
   FlightTakeoff,
   GetApp,
+  Handyman,
   Help,
   Home,
   ImportContacts,
   Info,
+  ManageAccounts,
   Menu,
   PowerSettingsNew,
   Refresh,
@@ -120,8 +121,6 @@ const useStyles = makeStyles((theme: AlicornTheme) => ({
 export function App(): JSX.Element {
   const classes = useStyles();
   const [page, setPage] = useState(getString("startup-page.name", "Tutor"));
-  const [enteredCommand, setEnteredCommand] = useState("/");
-  const [showCommand, setShowCommand] = useState(false);
   const [openNotice, setNoticeOpen] = useState(false);
   const [openWarn, setWarnOpen] = useState(false);
   const [openChangePageWarn, setOpenChangePageWarn] = useState(false);
@@ -201,6 +200,11 @@ export function App(): JSX.Element {
     });
   }, []);
   useEffect(() => {
+    ipcRenderer.once("YouAreGoingToBeKilled", () => {
+      void exitApp();
+    });
+  }, []);
+  useEffect(() => {
     const id = setInterval(async () => {
       await intervalSaveData();
     }, 300000);
@@ -235,50 +239,6 @@ export function App(): JSX.Element {
     });
   }, []);
 
-  useEffect(() => {
-    const fun = (e: KeyboardEvent) => {
-      if (getBoolean("command")) {
-        if (e.key === "/") {
-          setEnteredCommand("/"); // Clear on "/"
-          setShowCommand(true);
-          sessionStorage.setItem("isCommand", "1");
-          return;
-        }
-        if (showCommand) {
-          if (e.key === "Delete") {
-            if (enteredCommand === "/") {
-              setShowCommand(false);
-              sessionStorage.removeItem("isCommand");
-            } else {
-              setEnteredCommand(enteredCommand.slice(0, -1));
-            }
-            return;
-          }
-          if (e.key === "Enter") {
-            window.dispatchEvent(
-              new CustomEvent("AlicornCommand", { detail: enteredCommand })
-            );
-            setEnteredCommand("/");
-            setShowCommand(false);
-            sessionStorage.removeItem("isCommand");
-            return;
-          }
-          setEnteredCommand(enteredCommand + e.key);
-        }
-      }
-    };
-    const f1 = () => {
-      if (showCommand) {
-        setEnteredCommand(enteredCommand + " ");
-      }
-    };
-    window.addEventListener("keypress", fun);
-    window.addEventListener("HelpSpace", f1);
-    return () => {
-      window.removeEventListener("keypress", fun);
-      window.removeEventListener("HelpSpace", f1);
-    };
-  });
   return (
     <Box
       className={classes.root}
@@ -317,14 +277,11 @@ export function App(): JSX.Element {
         >
           <IconButton
             sx={{
-              display: showCommand ? "none" : undefined,
-              marginRight: "0.375em",
+              marginRight: "0.3rem",
             }}
             color={"inherit"}
             onClick={() => {
-              if (!showCommand) {
-                setOpenDrawer(true);
-              }
+              setOpenDrawer(true);
             }}
           >
             <Menu />
@@ -335,16 +292,11 @@ export function App(): JSX.Element {
               (getString("frame.drag-impl") === "Webkit" ? " window-drag" : "")
             }
           >
-            <Typography
-              variant={"h6"}
-              className={showCommand ? "smtxt" : undefined}
-            >
-              {showCommand ? enteredCommand : tr(page)}
-            </Typography>
+            <Typography variant={"h6"}>{tr(page)}</Typography>
           </Box>
           <Box
             style={
-              showCommand || window.location.hash.includes("QuickSetup")
+              window.location.hash.includes("QuickSetup")
                 ? { display: "none" }
                 : {}
             }
@@ -397,6 +349,7 @@ export function App(): JSX.Element {
                     remoteHideWindow();
                     waitUpdateFinished(() => {
                       prepareToQuit();
+                      ipcRenderer.send("readyToClose");
                       ipcRenderer.send("reload");
                     });
                   }}
@@ -444,7 +397,7 @@ export function App(): JSX.Element {
                   triggerSetPage("UtilitiesIndex");
                 }}
               >
-                <Build />
+                <Handyman />
               </IconButton>
             </Tooltip>
             <Tooltip
@@ -462,7 +415,7 @@ export function App(): JSX.Element {
                 }}
                 color={"inherit"}
               >
-                <AccountCircle />
+                <ManageAccounts />
               </IconButton>
             </Tooltip>
             <Tooltip
@@ -523,16 +476,7 @@ export function App(): JSX.Element {
             >
               <IconButton
                 className={classes.exitButton}
-                onClick={async () => {
-                  remoteHideWindow();
-                  await ipcRenderer.invoke(
-                    "markLoginItem",
-                    getBoolean("auto-launch")
-                  );
-                  waitUpdateFinished(() => {
-                    remoteCloseWindow();
-                  });
-                }}
+                onClick={exitApp}
                 color={"inherit"}
               >
                 <PowerSettingsNew />
@@ -686,6 +630,14 @@ export function App(): JSX.Element {
   );
 }
 
+async function exitApp(): Promise<void> {
+  remoteHideWindow();
+  await ipcRenderer.invoke("markLoginItem", getBoolean("auto-launch"));
+  waitUpdateFinished(() => {
+    remoteCloseWindow();
+  });
+}
+
 const PAGES_ICONS_MAP: Record<string, JSX.Element> = {
   LaunchPad: <FlightTakeoff />,
   Welcome: <Home />,
@@ -694,7 +646,7 @@ const PAGES_ICONS_MAP: Record<string, JSX.Element> = {
   JavaSelector: <ViewModule />,
   AccountManager: <AccountCircle />,
   ServerList: <Dns />,
-  UtilitiesIndex: <Build />,
+  UtilitiesIndex: <Handyman />,
   Statistics: <ShowChart />,
   Options: <Settings />,
   Version: <Info />,
@@ -742,6 +694,7 @@ export function remoteHideWindow(): void {
 export function remoteCloseWindow(): void {
   console.log("Closing!");
   prepareToQuit();
+  ipcRenderer.send("readyToClose");
   ipcRenderer.send("closeWindow");
 }
 
@@ -778,16 +731,20 @@ let mouseX: number | null = null;
 let mouseY: number | null = null;
 
 function onMouseDown(e: React.MouseEvent) {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  document.addEventListener("mouseup", onMouseUp);
-  requestAnimationFrame(moveWindow);
+  if (e.button === 0) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    document.addEventListener("mouseup", onMouseUp);
+    requestAnimationFrame(moveWindow);
+  }
 }
 
-function onMouseUp() {
-  document.removeEventListener("mouseup", onMouseUp);
-  if (animationId) {
-    cancelAnimationFrame(animationId);
+function onMouseUp(e: MouseEvent) {
+  if (e.button === 0) {
+    document.removeEventListener("mouseup", onMouseUp);
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+    }
   }
 }
 

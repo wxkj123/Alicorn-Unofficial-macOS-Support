@@ -32,13 +32,11 @@
   "interactive.i-have-a-crush-on-al": false,
   "startup-page.name": "Welcome",
   "startup-page.url": "/Welcome",
-  "starlight.join-server.timeout": 2000,
   "gw-size": "960x540",
   "memory": 0,
   "main-gc": "g1",
   "para-gc": "pure",
   "launch.fast-reboot": true,
-  "command": false,
   "assistant": "PonyCN",
   "hardware-acc": false,
   "download.primary-downloader": "Concurrent",
@@ -46,7 +44,7 @@
   "dev.experimental": false,
   "web.global-proxy": "",
   "doh-server": "Native",
-  "pff.first-source": "Curseforge",
+  "pff.first-source": "Modrinth",
   "features.saying": true,
   "features.miniwiki": true,
   "features.detect-lan": true,
@@ -63,8 +61,8 @@
   "alicorn-ping": true,
   "readyboom": true,
   "readyboom.cores": 3,
-  "system.ws-operation": false,
   "theme.zoom-factor": 1.0,
   "jvm.extra-args": "-Dfile.encoding=UTF-8 -showversion -XX:+IgnoreUnrecognizedVMOptions -XX:+UnlockExperimentalVMOptions",
-  "features.sword": true
+  "features.sword": true,
+  "pff.upgrade-mode": "Override"
 }

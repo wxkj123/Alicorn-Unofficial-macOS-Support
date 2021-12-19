@@ -1,4 +1,4 @@
-import { DeleteForever, EventBusy, Sync } from "@mui/icons-material";
+import { DeleteForever, EventBusy, Extension, Sync } from "@mui/icons-material";
 import {
   Box,
   Card,
@@ -15,11 +15,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { scanCoresInAllMountedContainers } from "../modules/container/ContainerScanner";
 import { getContainer } from "../modules/container/ContainerUtil";
-import { loadProfile } from "../modules/profile/ProfileLoader";
+import { isStillNeeded, loadProfile } from "../modules/profile/ProfileLoader";
 import { whatProfile } from "../modules/profile/WhatProfile";
 import { setDirtyProfile } from "../modules/readyboom/PrepareProfile";
 import { jumpTo, triggerSetPage } from "./GoTo";
 import { Icons } from "./Icons";
+import { submitWarn } from "./Message";
 import { YNDialog2 } from "./OperatingHint";
 import { isBgDark } from "./Renderer";
 import { addStatistics } from "./Statistics";
@@ -187,7 +188,7 @@ function SingleCoreDisplay(props: {
       <Card
         sx={{ backgroundColor: "primary.main" }}
         color={"primary"}
-        raised={true}
+        raised
         onMouseOver={() => {
           setShowBtn(true);
         }}
@@ -227,11 +228,20 @@ function SingleCoreDisplay(props: {
                     <IconButton
                       color={"inherit"}
                       className={classes.operateButton}
-                      onClick={(e) => {
-                        setDestroy(props.profile.id);
-                        setWarningOpen(true);
+                      onClick={async (e) => {
                         addStatistics("Click");
                         e.stopPropagation();
+                        if (
+                          await isStillNeeded(
+                            props.profile.id,
+                            getContainer(props.profile.container)
+                          )
+                        ) {
+                          submitWarn(tr("CoreInfo.CannotDestroy"));
+                          return;
+                        }
+                        setDestroy(props.profile.id);
+                        setWarningOpen(true);
                       }}
                     >
                       <DeleteForever />
@@ -257,6 +267,44 @@ function SingleCoreDisplay(props: {
                       <EventBusy />
                     </IconButton>
                   </Tooltip>
+                  {props.profile.versionType !== "Mojang" &&
+                  props.profile.versionType !== "Installer" ? (
+                    <Tooltip
+                      title={
+                        <Typography className={"smtxt"}>
+                          {tr("CoreInfo.Pff")}
+                        </Typography>
+                      }
+                    >
+                      <IconButton
+                        color={"inherit"}
+                        className={classes.operateButton}
+                        onClick={
+                          props.profile.versionType !== "Mojang" &&
+                          props.profile.versionType !== "Installer"
+                            ? (e) => {
+                                jumpTo(
+                                  `/PffFront/${encodeURIComponent(
+                                    props.profile.container
+                                  )}/${encodeURIComponent(
+                                    props.profile.baseVersion
+                                  )}/${encodeURIComponent(
+                                    props.profile.versionType
+                                  )}`
+                                );
+                                triggerSetPage("PffFront");
+                                addStatistics("Click");
+                                e.stopPropagation();
+                              }
+                            : undefined
+                        }
+                      >
+                        <Extension />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    ""
+                  )}
                 </Box>
               </Fade>
               <Tooltip
@@ -333,7 +381,6 @@ function SingleCoreDisplay(props: {
             <Typography
               className={classes.text}
               sx={{ color: isBgDark() ? "secondary.light" : undefined }}
-              gutterBottom
             >
               {tr("CoreInfo.Used", `Count=${used}`)}
             </Typography>
@@ -344,7 +391,7 @@ function SingleCoreDisplay(props: {
             <CorruptedCoreWarning />
           ) : (
             <Typography
-              className={classes.desc}
+              className={classes.text}
               sx={{ color: isBgDark() ? "secondary.light" : undefined }}
             >
               {getDescriptionFor(props.profile.versionType)}
