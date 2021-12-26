@@ -1,7 +1,6 @@
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import { schedulePromiseTask } from "../../renderer/Schedule";
 import { basicHash } from "../commons/BasicHash";
 import { getBoolean, getString } from "../config/ConfigSupport";
 import {
@@ -11,9 +10,8 @@ import {
 } from "./AbstractDownloader";
 import { getConfigOptn } from "./DownloadWrapper";
 import { getFileWriteStream, getTimeoutController } from "./RainbowFetch";
-import { addRecord } from "./ResolveLock";
 import { Serial } from "./Serial";
-import { getHash, getIdentifier } from "./Validate";
+import { getHash } from "./Validate";
 
 const TEMP_SAVE_PATH_ROOT = path.join(os.tmpdir(), "alicorn-download");
 
@@ -49,13 +47,7 @@ export class Concurrent extends AbstractDownloader {
       }
       const allChunks = generateChunks(fileSize);
       await Promise.all(getAllPromises(meta, allChunks, overrideTimeout));
-      await sealAndVerify(
-        meta.url,
-        meta.savePath,
-        allChunks,
-        meta.sha1,
-        fileSize
-      );
+      await sealAndVerify(meta.savePath, allChunks, meta.sha1, fileSize);
       return DownloadStatus.RESOLVED;
     } catch (e) {
       console.log(e);
@@ -65,14 +57,12 @@ export class Concurrent extends AbstractDownloader {
 }
 
 async function sealAndVerify(
-  url: string,
   savePath: string,
   chunks: Chunk[],
   hash: string,
   size: number
 ) {
-  await fs.createFile(savePath);
-  const wStream = fs.createWriteStream(savePath);
+  const wStream = fs.createWriteStream(savePath, { mode: 0o777 });
   for (const c of chunks) {
     const pt = path.join(
       TEMP_SAVE_PATH_ROOT,
@@ -93,14 +83,6 @@ async function sealAndVerify(
 
   wStream.close();
   if (hash === "" || getBoolean("download.skip-validate")) {
-    void (async (url) => {
-      const id = await schedulePromiseTask(() => {
-        return getIdentifier(savePath);
-      });
-      if (id.length > 0) {
-        addRecord(id, url);
-      }
-    })(url); // 'Drop' this promise
     return;
   }
 
@@ -112,15 +94,6 @@ async function sealAndVerify(
   if (hash !== h) {
     throw new Error("File hash mismatch for " + savePath);
   }
-  void (async (url) => {
-    const id = await schedulePromiseTask(() => {
-      return getIdentifier(savePath);
-    });
-    if (id.length > 0) {
-      addRecord(id, url);
-    }
-  })(url); // 'Drop' this promise
-
   return;
 }
 

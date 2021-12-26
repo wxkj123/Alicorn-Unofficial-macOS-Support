@@ -1,9 +1,11 @@
 import {
   AccessTime,
   AlignHorizontalLeft,
+  AltRoute,
   AutoFixOff,
   Bolt,
   Book,
+  CalendarToday,
   CameraEnhance,
   CancelPresentation,
   Chat,
@@ -97,7 +99,7 @@ import { AlicornTheme, useInputStyles } from "./Stylex";
 import { AL_THEMES } from "./ThemeColors";
 import { ALL_ASSISTANTS, tr } from "./Translator";
 
-export enum ConfigType {
+enum ConfigType {
   BOOL,
   NUM,
   STR,
@@ -289,6 +291,11 @@ export function OptionsPage(): JSX.Element {
         </TabPanel>
         <TabPanel index={1} value={tabValue}>
           <InputItem
+            icon={<CalendarToday />}
+            type={ConfigType.BOOL}
+            bindConfig={"features.tips-of-today"}
+          />
+          <InputItem
             icon={<TextFormat />}
             type={ConfigType.BOOL}
             bindConfig={"features.saying"}
@@ -416,6 +423,11 @@ export function OptionsPage(): JSX.Element {
             onChange={() => {
               void loadMirror();
             }}
+          />
+          <InputItem
+            icon={<AltRoute />}
+            type={ConfigType.NUM}
+            bindConfig={"download.mirror-tries"}
           />
           <InputItem
             icon={<MonitorHeart />}
@@ -587,11 +599,11 @@ export function hasEdited(conf: string): boolean {
   return localStorage.getItem("Edited." + conf) === "1";
 }
 
-export function markEdited(conf: string): void {
+function markEdited(conf: string): void {
   localStorage.setItem("Edited." + conf, "1");
 }
 
-export function InputItem(props: {
+function InputItem(props: {
   type: ConfigType;
   bindConfig: string;
   icon?: React.ReactNode;
@@ -858,7 +870,7 @@ export function InputItem(props: {
     </Container>
   );
 }
-export async function remoteSelectFile(): Promise<string> {
+async function remoteSelectFile(): Promise<string> {
   return String((await ipcRenderer.invoke("selectFile")) || "");
 }
 function TabPanel(props: {

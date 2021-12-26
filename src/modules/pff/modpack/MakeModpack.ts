@@ -4,6 +4,8 @@ import { createWriteStream } from "original-fs";
 import path from "path";
 import { pipeline } from "stream";
 import { promisify } from "util";
+import { submitInfo } from "../../../renderer/Message";
+import { tr } from "../../../renderer/Translator";
 import { basicHash } from "../../commons/BasicHash";
 import { MinecraftContainer } from "../../container/MinecraftContainer";
 import { getHash } from "../../download/Validate";
@@ -18,12 +20,10 @@ import {
   buildCommonModpackJSON,
   convertCommonToCF,
 } from "./ModpackBuilder";
-import {submitInfo} from "../../../renderer/Message";
-import {tr} from "../../../renderer/Translator";
 
 const pipe = promisify(pipeline);
 
-export async function compressPack(
+async function compressPack(
   source: string,
   outputDir: string,
   name: string
@@ -34,7 +34,8 @@ export async function compressPack(
     zipStream.addEntry(path.join(source, f));
   });
   const target = createWriteStream(
-    path.join(outputDir, name.toLowerCase() + ".prod.zip")
+    path.join(outputDir, name.toLowerCase() + ".prod.zip"),
+    { mode: 0o777 }
   );
   await pipe(zipStream, target);
 }
@@ -84,8 +85,10 @@ export async function sealPackCommon(
   const j = buildCommonModpackJSON(model);
   const j2 = buildCFModpackJSON(convertCommonToCF(model));
   setState("Compressing");
-  await writeFile(path.join(MODPACK_WORK_DIR, PACK_META), j);
-  await writeFile(path.join(MODPACK_WORK_DIR, MANIFEST_FILE), j2);
+  await writeFile(path.join(MODPACK_WORK_DIR, PACK_META), j, {mode:0o777});
+  await writeFile(path.join(MODPACK_WORK_DIR, MANIFEST_FILE), j2, {
+    mode: 0o777,
+  });
   await compressPack(MODPACK_WORK_DIR, container.rootDir, model.name);
   await remove(MODPACK_WORK_DIR);
   submitInfo(tr("Utilities.BuildUp.Done"));

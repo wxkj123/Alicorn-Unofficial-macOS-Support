@@ -22,11 +22,11 @@ export async function loadLockfile(
         await fixLockfile(l, container);
         return l;
       } catch {
-        await writeFile(lockPath, "{}");
+        await writeFile(lockPath, "{}", { mode: 0o777 });
         return {};
       }
     } else {
-      await writeFile(lockPath, "{}");
+      await writeFile(lockPath, "{}", { mode: 0o777 });
       return {};
     }
   } catch {
@@ -34,7 +34,7 @@ export async function loadLockfile(
   }
 }
 
-export async function fixLockfile(
+async function fixLockfile(
   lockfile: Lockfile2,
   container: MinecraftContainer
 ): Promise<void> {
@@ -58,7 +58,8 @@ export async function saveLockfile(
   try {
     await writeFile(
       container.getPff2LockFile(),
-      JSON.stringify(lockfile, null, 2)
+      JSON.stringify(lockfile, null, 2),
+      { mode: 0o777 }
     );
   } catch {}
 }

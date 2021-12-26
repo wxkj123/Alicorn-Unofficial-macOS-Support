@@ -9,6 +9,8 @@ import { MinecraftContainer } from "../../container/MinecraftContainer";
 
 const pipe = promisify(pipeline);
 
+// Forge has been removing the already downloaded mappings, and that's more than I can bear.
+// It's high time we end this.
 export async function rebuildForgeInstaller(
   container: MinecraftContainer,
   source: string
@@ -23,21 +25,21 @@ export async function rebuildForgeInstaller(
     for (const [i, x] of processors.entries()) {
       if (x.args instanceof Array) {
         if (x.args.includes("DOWNLOAD_MOJMAPS")) {
-          processors.splice(i, 1); // Remove this task
+          processors.splice(i, 1); // Remove this task, let us handle this.
           break;
         }
       }
     }
   }
   await fs.writeJSON(tJson, j);
-  await fs.remove(path.join(tDir, "META-INF")); // Dispose sign
+  await fs.remove(path.join(tDir, "META-INF")); // Dispose jar signature
   const files = await fs.readdir(tDir);
   const oStream = new zip.Stream();
   for (const f of files) {
     oStream.addEntry(path.join(tDir, f));
   }
   const target = source + ".patched.jar";
-  const o = createWriteStream(target);
+  const o = createWriteStream(target, { mode: 0o777 });
   await pipe(oStream, o);
   await fs.remove(source);
   await fs.move(target, source);

@@ -2,7 +2,6 @@ import { once } from "events";
 import fs from "fs-extra";
 import path from "path";
 import { pipeline } from "stream/promises";
-import { schedulePromiseTask } from "../../renderer/Schedule";
 import { getBoolean, getString } from "../config/ConfigSupport";
 import {
   AbstractDownloader,
@@ -10,14 +9,13 @@ import {
   DownloadStatus,
 } from "./AbstractDownloader";
 import { getPool } from "./Connections";
-import { getConfigOptn } from "./DownloadWrapper";
+import { getConfigOptn, getPffFlag } from "./DownloadWrapper";
 import {
   getFileWriteStream,
   getGuardStream,
   getTimeoutController,
 } from "./RainbowFetch";
-import { addRecord } from "./ResolveLock";
-import { getHash, getIdentifier } from "./Validate";
+import { getHash } from "./Validate";
 
 export class Serial extends AbstractDownloader {
   private static instance = new Serial();
@@ -47,6 +45,7 @@ export class Serial extends AbstractDownloader {
           );
           if (
             fetchRequire ||
+            getPffFlag() === "1" ||
             getString("download.lib").toLowerCase() === "fetch" ||
             !["direct://", ""].includes(
               getString("download.global-proxy").trim()
@@ -99,7 +98,7 @@ export class Serial extends AbstractDownloader {
             if (res.statusCode < 200 || res.statusCode >= 300) {
               return DownloadStatus.RETRY;
             }
-            const f = fs.createWriteStream(meta.savePath);
+            const f = fs.createWriteStream(meta.savePath, { mode: 0o777 });
             const gs = getGuardStream(
               res.body,
               f,
@@ -116,27 +115,11 @@ export class Serial extends AbstractDownloader {
             }
           }
           if (meta.sha1 === "" || getBoolean("download.skip-validate")) {
-            void (async (meta) => {
-              const id = await schedulePromiseTask(() => {
-                return getIdentifier(meta.savePath);
-              });
-              if (id.length > 0) {
-                addRecord(id, meta.url);
-              }
-            })(meta); // 'Drop' this promise
             return DownloadStatus.RESOLVED;
           }
           const h = await getHash(meta.savePath);
           if (meta.sha1 === h) {
-            // No error is ok, add record
-            void (async (meta) => {
-              const id = await schedulePromiseTask(() => {
-                return getIdentifier(meta.savePath);
-              });
-              if (id.length > 0) {
-                addRecord(id, meta.url);
-              }
-            })(meta); // 'Drop' this promise
+            // No error is ok
             return DownloadStatus.RESOLVED;
           }
 

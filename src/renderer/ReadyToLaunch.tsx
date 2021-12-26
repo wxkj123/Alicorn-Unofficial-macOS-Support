@@ -96,7 +96,8 @@ import {
   getNewJDK,
   parseJavaInfo,
   parseJavaInfoRaw,
-} from "../modules/java/JInfo";
+} from "../modules/java/JavaInfo";
+import { autoMemory } from "../modules/launch/ArgsGenerator";
 import {
   ensureAllAssets,
   ensureAssetsIndex,
@@ -105,10 +106,14 @@ import {
   ensureLog4jFile,
   ensureNatives,
 } from "../modules/launch/Ensurance";
-import { launchProfile, markSafeLaunch } from "../modules/launch/LaunchPad";
+import {
+  launchProfile,
+  markSafeLaunch,
+  shouldSafeLaunch,
+} from "../modules/launch/LaunchTool";
+import { LaunchTracker } from "../modules/launch/LaunchTracker";
 import { stopMinecraft } from "../modules/launch/MinecraftBootstrap";
-import { LaunchTracker } from "../modules/launch/Tracker";
-import { prepareModsCheckFor, restoreMods } from "../modules/modx/DynModLoad";
+import { prepareModsCheckFor, restoreMods } from "../modules/modx/ModDynLoad";
 import { GameProfile } from "../modules/profile/GameProfile";
 import { loadProfile } from "../modules/profile/ProfileLoader";
 import {
@@ -153,7 +158,7 @@ import { toReadableType } from "./YggdrasilAccountManager";
 
 const SESSION_ACCESSDATA_CACHED_KEY = "ReadyToLaunch.SessionAccessData"; // Microsoft account only
 export const LAST_SUCCESSFUL_GAME_KEY = "ReadyToLaunch.LastSuccessfulGame";
-export const REBOOT_KEY_BASE = "ReadyToLaunch.Reboot.";
+const REBOOT_KEY_BASE = "ReadyToLaunch.Reboot.";
 const useStyles = makeStyles((theme: AlicornTheme) => ({
   stepper: {
     backgroundColor: theme.palette.secondary.light,
@@ -777,10 +782,14 @@ async function startBoot(
       resolutionPolicy = true;
     }
   }
+  const safe = shouldSafeLaunch(container.id, profile.id);
   if (!isReboot(profileHash)) {
     NEED_QUERY_STATUS = true;
     setStatus(LaunchingStatus.FILES_FILLING);
-    const st = await waitProfileReady(container.id, profile.id);
+    let st = false;
+    if (!safe) {
+      st = await waitProfileReady(container.id, profile.id);
+    }
     if (!st) {
       // I shall do this
       await ensureAssetsIndex(profile, container);
@@ -843,7 +852,7 @@ async function startBoot(
       if (d.includes("---- Minecraft Crash Report ----")) {
         d = d.trim();
       } else {
-        d = d.trimRight();
+        d = d.trimEnd();
       }
       if (d.length > 0) {
         // @ts-ignore
@@ -884,7 +893,7 @@ async function startBoot(
       console.log(
         `Attention! Minecraft(${runID}) might not have run properly!`
       );
-      markSafeLaunch(container.id, profile.id);
+      markSafeLaunch(container.id, profile.id, true);
       console.log(`Set ${container.id}/${profile.id} as safe mode.`);
       // @ts-ignore
       const e = window[LAST_LOGS_KEY] as string[];
@@ -929,7 +938,7 @@ async function startBoot(
       ndServerId: ndServerId,
       resolution: resolutionPolicy ? new Pair(w, h) : undefined,
       javaVersion: jInfo ? jInfo.rootVersion : 0,
-      maxMem: getNumber("memory", 0),
+      maxMem: getNumber("memory") || autoMemory(),
       gc1: getString("main-gc", "z"),
       gc2: getString("para-gc", "pure"),
     });

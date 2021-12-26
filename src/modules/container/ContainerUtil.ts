@@ -1,7 +1,10 @@
 import { schedulePromiseTask } from "../../renderer/Schedule";
+import { randsl } from "../../renderer/Translator";
 import { ALICORN_DATA_SUFFIX } from "../commons/Constants";
+import { isFileExist } from "../commons/FileUtil";
 import { buildMap, parseMap } from "../commons/MapUtil";
 import { loadData, saveData, saveDataSync } from "../config/DataSupport";
+import { createNewContainer } from "./ContainerWrapper";
 import { MinecraftContainer } from "./MinecraftContainer";
 
 let GlobalContainerDescriptorTable: Map<string, string> = new Map();
@@ -19,7 +22,7 @@ export function getAllContainerPaths(): string[] {
   return Array.from(GlobalContainerDescriptorTable.values());
 }
 
-export function rootOf(containerID: string): string {
+function rootOf(containerID: string): string {
   return GlobalContainerDescriptorTable.get(containerID) || "";
 }
 

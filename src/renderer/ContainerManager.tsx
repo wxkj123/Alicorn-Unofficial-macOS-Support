@@ -1,5 +1,6 @@
 import {
   Add,
+  CopyAll,
   Eject,
   FolderOpen,
   Input,
@@ -51,6 +52,7 @@ import {
 import {
   clearContainer,
   createNewContainer,
+  forkContainer,
   unlinkContainer,
 } from "../modules/container/ContainerWrapper";
 import { MinecraftContainer } from "../modules/container/MinecraftContainer";
@@ -66,8 +68,9 @@ import {
 import { isWebFileExist } from "../modules/download/RainbowFetch";
 import { deployIJPack } from "../modules/pff/modpack/InstallIJModpack";
 import { wrappedInstallModpack } from "../modules/pff/modpack/InstallModpack";
+import { setChangePageWarn } from "./GoTo";
 import { Icons } from "./Icons";
-import { submitSucc } from "./Message";
+import { submitSucc, submitWarn } from "./Message";
 import {
   FailedHint,
   OperatingHint,
@@ -87,8 +90,10 @@ export function setContainerListDirty(): void {
 }
 
 export function ContainerManager(): JSX.Element {
-  let { modpack } = useParams<{ modpack?: string }>();
+  // eslint-disable-next-line prefer-const
+  let { modpack, togo } = useParams<{ modpack?: string; togo?: string }>();
   modpack = modpack ? decodeURIComponent(modpack) : undefined;
+  const hasToGo = togo === "1";
   const isEleMounted = useRef<boolean>();
   const [refreshTrigger, triggerRefresh] = useState(true);
   const [operating, setOpen] = useState(false);
@@ -124,20 +129,25 @@ export function ContainerManager(): JSX.Element {
   const allContainers = getAllMounted().concat(getAllNotMounted());
   return (
     <Box className={classes2.para}>
-      <OperatingHintCustom open={operating} msg={doing} />
-      <FailedHint
-        closeFunc={() => {
-          setFailedOpen(false);
-        }}
-        open={failedOpen}
-        reason={reason}
-      />
+      <ThemeProvider
+        theme={
+          isBgDark() ? ALICORN_DEFAULT_THEME_DARK : ALICORN_DEFAULT_THEME_LIGHT
+        }
+      >
+        <OperatingHintCustom open={operating} msg={doing} />
+        <FailedHint
+          closeFunc={() => {
+            setFailedOpen(false);
+          }}
+          open={failedOpen}
+          reason={reason}
+        />
+      </ThemeProvider>
       <AddNewContainer
+        autoStart={hasToGo}
         modpack={modpack}
         setOperate={(s) => {
-          if (isEleMounted.current) {
-            setOpen(s);
-          }
+          setOpen(s);
         }}
         refresh={() => {
           triggerRefresh(!refreshTrigger);
@@ -148,9 +158,7 @@ export function ContainerManager(): JSX.Element {
           setReason(e);
         }}
         closeFunc={() => {
-          if (isEleMounted.current) {
-            setCreating(false);
-          }
+          setCreating(false);
         }}
       />
       <Box sx={{ textAlign: "right" }}>
@@ -229,7 +237,6 @@ function SingleContainerDisplay(props: {
   return (
     <>
       <OperatingHint open={operating} />
-
       <Card
         sx={{
           backgroundColor: props.isMounted ? "primary.main" : "primary.light",
@@ -271,11 +278,41 @@ function SingleContainerDisplay(props: {
                       <IconButton
                         color={"inherit"}
                         className={classes.operateButton}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setOpen(true);
                         }}
                       >
                         <LinkOff />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip
+                      title={
+                        <Typography className={"smtxt"}>
+                          {tr("ContainerManager.Fork")}
+                        </Typography>
+                      }
+                    >
+                      <IconButton
+                        color={"inherit"}
+                        className={classes.operateButton}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setOperating(true);
+                          setChangePageWarn(true);
+                          try {
+                            await forkContainer(props.container);
+                            submitSucc(tr("ContainerManager.Forked"));
+                          } catch (e) {
+                            submitWarn(tr("ContainerManager.FailedToFork"));
+                          }
+                          setChangePageWarn(false);
+                          setOperating(false);
+                          setContainerListDirty();
+                          setRefresh(!refresh);
+                        }}
+                      >
+                        <CopyAll />
                       </IconButton>
                     </Tooltip>
                     <Tooltip
@@ -288,7 +325,8 @@ function SingleContainerDisplay(props: {
                       <IconButton
                         color={"inherit"}
                         className={classes.operateButton}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setClearOpen(true);
                         }}
                       >
@@ -308,11 +346,7 @@ function SingleContainerDisplay(props: {
                         <IconButton
                           color={"inherit"}
                           className={classes.operateButton}
-                          onClick={() => {
-                            unmount(props.container.id);
-                            setContainerListDirty();
-                            setRefresh(!refresh);
-                          }}
+                          // This has the same effect with just click the card
                         >
                           <Eject />
                         </IconButton>
@@ -328,11 +362,6 @@ function SingleContainerDisplay(props: {
                         <IconButton
                           color={"inherit"}
                           className={classes.operateButton}
-                          onClick={() => {
-                            mount(props.container.id);
-                            setContainerListDirty();
-                            setRefresh(!refresh);
-                          }}
                         >
                           <Input />
                         </IconButton>
@@ -348,7 +377,8 @@ function SingleContainerDisplay(props: {
                       <IconButton
                         color={"inherit"}
                         className={classes.operateButton}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           try {
                             shell.showItemInFolder(props.container.rootDir);
                           } catch {}
@@ -519,7 +549,9 @@ async function validateDir(n: string): Promise<boolean> {
 
 function genContainerName(s: string): string {
   const s2 = path.basename(s).split(".");
-  s2.pop();
+  if (s2.length >= 2) {
+    s2.pop();
+  }
   const s3 = s2.join(".").replace(/^\S/, (s) => s.toUpperCase());
   return s3 || "Container" + Math.floor(Math.random() * 10000);
 }
@@ -540,11 +572,15 @@ function AddNewContainer(props: {
   setFailed: (s: string) => unknown;
   refresh: () => unknown;
   modpack?: string;
+  autoStart?: boolean;
 }): JSX.Element {
   const [selectedDir, setSelected] = useState(
     props.modpack
       ? !isURL(props.modpack)
-        ? path.dirname(props.modpack)
+        ? path.join(
+            path.dirname(props.modpack),
+            "Modpack-" + basicHash(props.modpack).slice(0, 6)
+          )
         : path.join(
             os.homedir(),
             "OnlineModpack-" + basicHash(props.modpack).slice(0, 6)
@@ -561,6 +597,56 @@ function AddNewContainer(props: {
   const [allowModpack, setAllowModpack] = useState(!!props.modpack);
   const [modpackPath, setModpackPath] = useState(props.modpack || "");
   const classes = useInputStyles();
+  useEffect(() => {
+    if (props.autoStart) {
+      props.closeFunc();
+      void start(props);
+    }
+  }, []);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const start = async (props: any) => {
+    props.closeFunc();
+    props.setOperate(true);
+    try {
+      await createContainer(usedName, selectedDir, createASC);
+    } catch (e) {
+      props.setFailed(String(e));
+    }
+    if (allowModpack) {
+      addDoing(tr("ContainerManager.FetchingModpack"));
+      let mp = await getTempStorePath(modpackPath);
+      if (!(await isFileExist(modpackPath))) {
+        if (
+          (await wrappedDownloadFile(new DownloadMeta(modpackPath, mp))) !== 1
+        ) {
+          props.setFailed(tr("ContainerManager.FailedToFetch"));
+        }
+      } else {
+        mp = modpackPath;
+      }
+
+      try {
+        const s = await fs.stat(mp);
+        if (mp.endsWith(".zip") || s.isDirectory()) {
+          await wrappedInstallModpack(getContainer(usedName), mp);
+        }
+        if (mp.endsWith(".json")) {
+          await deployIJPack(getContainer(usedName), mp);
+        }
+        props.refresh();
+      } catch (e) {
+        props.setFailed(String(e));
+      }
+    }
+    setName("");
+    setSelected("");
+    setAllowModpack(false);
+    setCreateASC(hasEdited("cx.shared-root"));
+    setModpackPath("");
+    props.setOperate(false);
+    props.refresh();
+    submitSucc(tr("ContainerManager.InstallOK"));
+  };
   return (
     <ThemeProvider
       theme={
@@ -568,7 +654,7 @@ function AddNewContainer(props: {
       }
     >
       <Dialog
-        open={props.open}
+        open={props.open && !props.autoStart}
         onClose={() => {
           setName("");
           setSelected("");
@@ -749,7 +835,7 @@ function AddNewContainer(props: {
               sx={{
                 display: allowModpack ? "inherit" : "none",
               }}
-              variant={"outlined"}
+              variant={"contained"}
               onClick={async () => {
                 const d = await remoteSelectModpack();
                 setModpackPath(d);
@@ -786,47 +872,8 @@ function AddNewContainer(props: {
               selectedDir.trim().length <= 0 ||
               (allowModpack && modpackPath.trim().length <= 0)
             }
-            onClick={async () => {
-              props.closeFunc();
-              props.setOperate(true);
-              try {
-                await createContainer(usedName, selectedDir, createASC);
-              } catch (e) {
-                props.setFailed(String(e));
-              }
-              if (allowModpack) {
-                addDoing(tr("ContainerManager.FetchingModpack"));
-                let mp = await getTempStorePath(modpackPath);
-                if (!(await isFileExist(modpackPath))) {
-                  if (
-                    (await wrappedDownloadFile(
-                      new DownloadMeta(modpackPath, mp)
-                    )) !== 1
-                  ) {
-                    props.setFailed(tr("ContainerManager.FailedToFetch"));
-                  }
-                } else {
-                  mp = modpackPath;
-                }
-                try {
-                  if (mp.endsWith(".zip")) {
-                    await wrappedInstallModpack(getContainer(usedName), mp);
-                  }
-                  if (mp.endsWith(".json")) {
-                    await deployIJPack(getContainer(usedName), mp);
-                  }
-                  props.refresh();
-                } catch (e) {
-                  props.setFailed(String(e));
-                }
-              }
-              setName("");
-              setSelected("");
-              setAllowModpack(false);
-              setCreateASC(hasEdited("cx.shared-root"));
-              setModpackPath("");
-              props.setOperate(false);
-              submitSucc(tr("ContainerManager.InstallOK"));
+            onClick={() => {
+              void start(props);
             }}
           >
             {tr("ContainerManager.Continue")}
@@ -841,7 +888,7 @@ export async function remoteSelectDir(): Promise<string> {
   return String((await ipcRenderer.invoke("selectDir")) || "");
 }
 
-export async function remoteSelectModpack(): Promise<string> {
+async function remoteSelectModpack(): Promise<string> {
   return String((await ipcRenderer.invoke("selectModpack")) || "");
 }
 

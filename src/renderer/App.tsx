@@ -50,11 +50,7 @@ import {
 import { saveGDT, saveGDTSync } from "../modules/container/ContainerUtil";
 import { saveVF, saveVFSync } from "../modules/container/ValidateRecord";
 import { handleDnD } from "../modules/dnd/DnDCenter";
-import {
-  saveResolveLock,
-  saveResolveLockSync,
-} from "../modules/download/ResolveLock";
-import { saveJDT, saveJDTSync } from "../modules/java/JInfo";
+import { saveJDT, saveJDTSync } from "../modules/java/JavaInfo";
 import { waitUpdateFinished } from "../modules/selfupdate/Updator";
 import { saveServers, saveServersSync } from "../modules/server/ServerFiles";
 import { ContainerManager } from "./ContainerManager";
@@ -80,6 +76,7 @@ import { ServerList } from "./ServerList";
 import { saveStatistics, Statistics } from "./Statistics";
 import { AlicornTheme } from "./Stylex";
 import { TheEndingOfTheEnd } from "./TheEndingOfTheEnd";
+import { TipsOfToday } from "./TipsOfToday";
 import { tr } from "./Translator";
 import { BuildUp } from "./utilities/BuildUp";
 import { CarouselBoutique } from "./utilities/CarouselBoutique";
@@ -135,6 +132,9 @@ export function App(): JSX.Element {
   const [succ, setSucc] = useState("");
   const [refreshBit, setRefreshBit] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [openTips, setOpenTips] = useState(
+    getBoolean("features.tips-of-today")
+  );
   const sessionID = useRef(0);
   const clearSnacks = () => {
     setInfoOpen(false);
@@ -504,7 +504,7 @@ export function App(): JSX.Element {
           />
           <Route path={"/Version"} component={VersionView} />
           <Route
-            path={"/ContainerManager/:modpack?"}
+            path={"/ContainerManager/:modpack?/:togo?"}
             component={ContainerManager}
           />
           <Route
@@ -554,7 +554,12 @@ export function App(): JSX.Element {
         yes={tr("System.JumpPageWarn.Yes")}
         no={tr("System.JumpPageWarn.No")}
       />
-
+      <TipsOfToday
+        onClose={() => {
+          setOpenTips(false);
+        }}
+        open={openTips}
+      />
       <Snackbar
         open={openNotice}
         sx={{
@@ -691,7 +696,7 @@ export function remoteHideWindow(): void {
   ipcRenderer.send("hideWindow");
 }
 
-export function remoteCloseWindow(): void {
+function remoteCloseWindow(): void {
   console.log("Closing!");
   prepareToQuit();
   ipcRenderer.send("readyToClose");
@@ -708,7 +713,6 @@ export function prepareToQuit(): void {
   saveGDTSync();
   saveJDTSync();
   saveVFSync();
-  saveResolveLockSync();
   saveServersSync();
   saveStatistics();
   console.log("All chunks are saved.");
@@ -720,7 +724,6 @@ async function intervalSaveData(): Promise<void> {
   await saveGDT();
   await saveJDT();
   await saveVF();
-  await saveResolveLock();
   await saveServers();
   saveStatistics();
   console.log("All chunks are saved.");

@@ -4,7 +4,7 @@ import path from "path";
 import { copyFileStream, isFileExist } from "../commons/FileUtil";
 import { getBasePath } from "./PathSolve";
 
-export const DATA_ROOT = path.resolve(os.homedir(), "alicorn");
+const DATA_ROOT = path.resolve(os.homedir(), "alicorn");
 export const DEFAULTS_ROOT = path.resolve(getBasePath(), "defaults");
 
 export async function loadData(dataPath: string): Promise<string> {
@@ -30,14 +30,14 @@ export async function saveData(
   try {
     const dest = getActualDataPath(relativePath);
     await fs.ensureDir(path.dirname(dest));
-    await fs.writeFile(dest, data);
+    await fs.writeFile(dest, data, { mode: 0o777 });
   } catch {}
 }
 
 export function saveDataSync(relativePath: string, data: string): void {
   const dest = getActualDataPath(relativePath);
   fs.ensureDirSync(path.dirname(dest));
-  fs.writeFileSync(dest, data);
+  fs.writeFileSync(dest, data, { mode: 0o777 });
 }
 
 // Hint: DO NOT use 'fs.copyFile' here!

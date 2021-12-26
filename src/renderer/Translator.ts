@@ -12,20 +12,11 @@ function currentLocale(): string {
 
 const localesMap = new Map<string, Record<string, string | string[]>>();
 
-export function registryLocale(
+function registryLocale(
   code: string,
   data: Record<string, string | string[]>
 ): void {
   localesMap.set(code, data);
-}
-
-export function getLocaleList(): string[] {
-  return Array.from(localesMap.keys());
-}
-
-export function hasKey(k: string): boolean {
-  const res = (localesMap.get(currentLocale()) || {})[k];
-  return res === undefined || res.length === 0;
 }
 
 const TEMP_CHANGE_TR_ACTION_KEY = "Translator.UseLocale";
@@ -156,10 +147,6 @@ async function buildLocale(
     return {};
   }
 }
-export function getCurrentLocale(): string {
-  return currentLocale();
-}
-
 // {Config:key.key} returns the config
 function applyEnvironmentVars(strIn: string): string {
   if (!strIn.includes("{") || !strIn.includes("}")) {
@@ -244,4 +231,26 @@ function trimControlCode(origin: string[], rules: string[]): string[] {
     }
   });
   return output;
+}
+
+export interface Tip {
+  name: string;
+  text: string;
+  img: string;
+  rel?: string;
+}
+
+let TIPS: Tip[] = [];
+
+export async function loadTips(): Promise<void> {
+  try {
+    const f = JSON.parse(
+      (await readFile(getPathInDefaults("tips.json"))).toString()
+    );
+    TIPS = f;
+  } catch {}
+}
+
+export function getTip(): Tip {
+  return TIPS[Math.floor(Math.random() * TIPS.length)];
 }

@@ -24,8 +24,7 @@ import { prepareEdgeExecutable } from "../modules/cutie/BootEdge";
 import { initConcurrentDownloader } from "../modules/download/Concurrent";
 import { initDownloadWrapper } from "../modules/download/DownloadWrapper";
 import { loadAllMirrors, loadMirror } from "../modules/download/Mirror";
-import { initResolveLock } from "../modules/download/ResolveLock";
-import { loadJDT, preCacheJavaInfo } from "../modules/java/JInfo";
+import { loadJDT, preCacheJavaInfo } from "../modules/java/JavaInfo";
 import { prefetchFabricManifest } from "../modules/pff/get/FabricGet";
 import { prefetchForgeManifest } from "../modules/pff/get/ForgeGet";
 import { prefetchMojangVersions } from "../modules/pff/get/MojangCore";
@@ -34,6 +33,7 @@ import { setupMSAccountRefreshService } from "../modules/readyboom/AccountMaster
 import { setupHotProfilesService } from "../modules/readyboom/PrepareProfile";
 import { initEncrypt } from "../modules/security/Encrypt";
 import { getMachineUniqueID } from "../modules/security/Unique";
+import { setBeacon } from "../modules/selfupdate/Beacon";
 import { todayPing } from "../modules/selfupdate/Ping";
 import { checkUpdate, initUpdator } from "../modules/selfupdate/Updator";
 import { loadServers } from "../modules/server/ServerFiles";
@@ -44,7 +44,7 @@ import { submitInfo, submitWarn } from "./Message";
 import { initWorker } from "./Schedule";
 import { initStatistics } from "./Statistics";
 import { AL_THEMES } from "./ThemeColors";
-import { initTranslator, tr } from "./Translator";
+import { initTranslator, loadTips, tr } from "./Translator";
 
 try {
   console.log("Renderer first log.");
@@ -111,6 +111,7 @@ try {
     printScreen("Loading lang, config, gdt, jdt...");
     await Promise.allSettled([
       initTranslator(),
+      loadTips(),
       loadConfig(),
       loadGDT(),
       loadJDT(),
@@ -198,7 +199,7 @@ try {
     void completeFirstRun(); // Not blocking
     void todayPing();
     // Heavy works and minor works
-    await Promise.allSettled([initResolveLock(), initVF(), preCacheJavaInfo()]);
+    await Promise.allSettled([initVF(), preCacheJavaInfo(), setBeacon()]);
     const t2 = new Date();
     console.log(
       "Delayed init tasks finished. Time elapsed: " +
@@ -368,7 +369,7 @@ function flushColors(): void {
 const FONT_FAMILY =
   '"Ubuntu Mono", Consolas, "Courier New", Courier, "Source Hans Sans", "Roboto Medium", "Microsoft YaHei", "Segoe UI", SimHei, Tahoma, Geneva, Verdana, sans-serif';
 
-export function setThemeParams(
+function setThemeParams(
   primaryMain: string,
   primaryLight: string,
   secondaryMain: string,

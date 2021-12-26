@@ -15,17 +15,23 @@ import {
   parseJavaInfo,
   parseJavaInfoRaw,
   setDefaultJavaHome,
-} from "../modules/java/JInfo";
+} from "../modules/java/JavaInfo";
 import { whereJava } from "../modules/java/WhereJava";
 import {
   downloadProfile,
+  getLatestMojangCore,
   getProfileURLById,
 } from "../modules/pff/get/MojangCore";
-import { startInst } from "./Instruction";
+import { isInstBusy, startInst } from "./Instruction";
+import { checkToGoAndDecideJump, loadToGoHook } from "./linkage/AlicornToGo";
 import { submitInfo, submitSucc } from "./Message";
 import { tr } from "./Translator";
 export function waitInstDone(): Promise<void> {
   return new Promise<void>((res) => {
+    if (!isInstBusy()) {
+      res();
+      return;
+    }
     const fun = () => {
       window.removeEventListener("InstructionEnd", fun);
       res();
@@ -34,7 +40,7 @@ export function waitInstDone(): Promise<void> {
   });
 }
 
-export async function waitJavaSearch(): Promise<boolean> {
+async function waitJavaSearch(): Promise<boolean> {
   const r = await whereJava(true, true);
   if (r.length > 0) {
     return true;
@@ -44,6 +50,7 @@ export async function waitJavaSearch(): Promise<boolean> {
 
 export async function completeFirstRun(): Promise<void> {
   if (!getBoolean("first-run?")) {
+    await checkToGoAndDecideJump();
     return;
   }
   await createNewContainer(
@@ -51,10 +58,11 @@ export async function completeFirstRun(): Promise<void> {
     tr("FirstRun.Default") || "Minecraft"
   );
   const ct = getContainer(tr("FirstRun.Default") || "Minecraft");
-  const u = await getProfileURLById("1.17.1");
+  const lv = await getLatestMojangCore();
+  const u = await getProfileURLById(lv);
   await Promise.allSettled([
-    setupFirstJavaCheck(),
-    downloadProfile(u, ct, "1.17.1"),
+    setupFirstJavaCheckAndCheckToGo(),
+    downloadProfile(u, ct, lv),
   ]);
   set("first-run?", false);
 }
@@ -79,7 +87,7 @@ function getMCDefaultRootDir(): string {
   }
 }
 
-export async function setupFirstJavaCheck(): Promise<void> {
+async function setupFirstJavaCheckAndCheckToGo(): Promise<void> {
   submitInfo(tr("FirstRun.Preparing"));
   let s = false;
   void (async () => {
@@ -91,16 +99,16 @@ export async function setupFirstJavaCheck(): Promise<void> {
     await waitInstDone();
     if (os.platform() === "win32") {
       const j8 = await getLatestJREURL(true);
-      const j16 = await getLatestJREURL(false);
+      const j17 = await getLatestJREURL(false);
       submitInfo(tr("FirstRun.FetchingJava"));
-      await Promise.all([downloadJREInstaller(j8), downloadJREInstaller(j16)]);
+      await Promise.all([downloadJREInstaller(j8), downloadJREInstaller(j17)]);
       submitInfo(tr("FirstRun.InstallingJava"));
       await waitJREInstaller(j8);
-      await waitJREInstaller(j16);
+      await waitJREInstaller(j17);
       await whereJava(true);
     } else {
       void shell.openExternal(
-        "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/16/jre/x64/linux/"
+        "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/17/jre/x64/linux/"
       );
       void shell.openExternal(
         "https://mirror.tuna.tsinghua.edu.cn/AdoptOpenJDK/8/jre/x64/linux/"
@@ -111,17 +119,27 @@ export async function setupFirstJavaCheck(): Promise<void> {
   } else {
     startInst("JavaOK");
   }
-  await whereJava(true);
-  let a = "";
-  submitInfo(tr("FirstRun.ConfiguringJava"));
-  await Promise.allSettled(
-    getAllJava().map(async (j) => {
-      const jf = parseJavaInfo(parseJavaInfoRaw(await getJavaInfoRaw(j)));
-      if (jf.rootVersion >= 16) {
-        a = j;
-      }
+  // Delegate this task
+  void whereJava(true)
+    .then(async () => {
+      let a = "";
+      submitInfo(tr("FirstRun.ConfiguringJava"));
+      await Promise.allSettled(
+        getAllJava().map(async (j) => {
+          const jf = parseJavaInfo(parseJavaInfoRaw(await getJavaInfoRaw(j)));
+          if (jf.rootVersion >= 17) {
+            a = j;
+          }
+        })
+      );
+      setDefaultJavaHome(a || getAllJava()[0] || "");
+      submitSucc(tr("FirstRun.JavaConfigured"));
     })
-  );
-  setDefaultJavaHome(a || getAllJava()[0] || "");
-  submitSucc(tr("FirstRun.JavaConfigured"));
+    .catch(() => {});
+  await waitInstDone();
+  if (await loadToGoHook()) {
+    startInst("HavePack");
+    await waitInstDone();
+    await checkToGoAndDecideJump();
+  }
 }
