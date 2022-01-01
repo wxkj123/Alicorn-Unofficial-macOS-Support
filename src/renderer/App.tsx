@@ -7,7 +7,6 @@ import {
   FlightTakeoff,
   GetApp,
   Handyman,
-  Help,
   Home,
   ImportContacts,
   Info,
@@ -23,6 +22,7 @@ import {
   Alert,
   AppBar,
   Box,
+  Chip,
   Container,
   Drawer,
   Fab,
@@ -37,7 +37,7 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { ipcRenderer, shell } from "electron";
+import { ipcRenderer } from "electron";
 import React, { useEffect, useRef, useState } from "react";
 import { Route } from "react-router-dom";
 import { safeGet } from "../modules/commons/Null";
@@ -175,7 +175,7 @@ export function App(): JSX.Element {
     };
   });
   useEffect(() => {
-    window.addEventListener("changePageWarn", (e) => {
+    const f1 = (e: Event) => {
       setOpenChangePageWarn(true);
       const s = safeGet(e, ["detail"], {});
       // @ts-ignore
@@ -184,20 +184,30 @@ export function App(): JSX.Element {
       const history = !!s.history;
       setHaveHistory(history);
       setJumpPageTarget(target);
-    });
-    window.addEventListener("changePageWarnTitle", (e) => {
+    };
+    window.addEventListener("changePageWarn", f1);
+    const f = (e: Event) => {
       setPageTarget(String(safeGet(e, ["detail"], "Welcome")));
-    });
+    };
+    window.addEventListener("changePageWarnTitle", f);
+    return () => {
+      window.removeEventListener("changePageWarn", f1);
+      window.removeEventListener("changePageWarnTitle", f);
+    };
   }, []);
   useEffect(() => {
-    document.addEventListener("setPage", (e) => {
+    const f = (e: Event) => {
       // @ts-ignore
       if (window[CHANGE_PAGE_WARN]) {
         setPageTarget(String(safeGet(e, ["detail"], "Welcome")));
         return;
       }
       setPage(String(safeGet(e, ["detail"], "Welcome")));
-    });
+    };
+    document.addEventListener("setPage", f);
+    return () => {
+      document.removeEventListener("setPage", f);
+    };
   }, []);
   useEffect(() => {
     ipcRenderer.once("YouAreGoingToBeKilled", () => {
@@ -213,7 +223,7 @@ export function App(): JSX.Element {
     };
   }, []);
   useEffect(() => {
-    window.addEventListener("sysError", (e) => {
+    const f3 = (e: Event) => {
       setErr(String(safeGet(e, ["detail"], "Unknown Error")));
       clearSnacks();
       setNoticeOpen(true);
@@ -221,22 +231,34 @@ export function App(): JSX.Element {
         "reportError",
         String(safeGet(e, ["detail"], "Unknown Error"))
       );
-    });
-    window.addEventListener("sysWarn", (e) => {
+    };
+    window.addEventListener("sysError", f3);
+    const f1 = (e: Event) => {
       setWarn(String(safeGet(e, ["detail"], "Unknown Warning")));
       clearSnacks();
       setWarnOpen(true);
-    });
-    window.addEventListener("sysInfo", (e) => {
+    };
+    window.addEventListener("sysWarn", f1);
+
+    const f0 = (e: Event) => {
       setInfo(String(safeGet(e, ["detail"], "")));
       clearSnacks();
       setInfoOpen(true);
-    });
-    window.addEventListener("sysSucc", (e) => {
+    };
+    window.addEventListener("sysInfo", f0);
+
+    const f = (e: Event) => {
       setSucc(String(safeGet(e, ["detail"], "")));
       clearSnacks();
       setSuccOpen(true);
-    });
+    };
+    window.addEventListener("sysSucc", f);
+    return () => {
+      window.removeEventListener("sysError", f3);
+      window.removeEventListener("sysSucc", f);
+      window.removeEventListener("sysInfo", f0);
+      window.removeEventListener("sysWarn", f1);
+    };
   }, []);
 
   return (
@@ -270,11 +292,7 @@ export function App(): JSX.Element {
       }}
     >
       <AppBar enableColorOnDark>
-        <Toolbar
-          onMouseDown={
-            getString("frame.drag-impl") === "Delta" ? onMouseDown : undefined
-          }
-        >
+        <Toolbar>
           <IconButton
             sx={{
               marginRight: "0.3rem",
@@ -286,13 +304,20 @@ export function App(): JSX.Element {
           >
             <Menu />
           </IconButton>
-          <Box
-            className={
-              classes.title +
-              (getString("frame.drag-impl") === "Webkit" ? " window-drag" : "")
-            }
-          >
-            <Typography variant={"h6"}>{tr(page)}</Typography>
+          <Box className={classes.title}>
+            <Typography
+              variant={"h6"}
+              className={
+                getString("frame.drag-impl") === "Webkit" ? " window-drag" : ""
+              }
+              onMouseDown={
+                getString("frame.drag-impl") === "Delta"
+                  ? onMouseDown
+                  : undefined
+              }
+            >
+              {tr(page)}
+            </Typography>
           </Box>
           <Box
             style={
@@ -322,18 +347,6 @@ export function App(): JSX.Element {
             ) : (
               ""
             )}
-            <Fab
-              variant={"extended"}
-              color={"secondary"}
-              className={classes.floatMore}
-              size={"medium"}
-              onClick={() => {
-                void shell.openExternal("https://almc.pages.dev");
-              }}
-            >
-              <Help className={classes.buttonText} />
-              {tr("MainMenu.Help")}
-            </Fab>
             {getBoolean("dev") ? (
               <Tooltip
                 title={
@@ -658,6 +671,8 @@ const PAGES_ICONS_MAP: Record<string, JSX.Element> = {
   TheEndingOfTheEnd: <ImportContacts />,
 };
 
+const BETAS = ["ServerList"];
+
 function PagesDrawer(props: {
   open: boolean;
   onClose: () => unknown;
@@ -682,7 +697,10 @@ function PagesDrawer(props: {
               button
             >
               <ListItemIcon>{i}</ListItemIcon>
-              <ListItemText>{tr(p)}</ListItemText>
+              <ListItemText>
+                {tr(p)}
+                {BETAS.includes(p) ? <BetaTag /> : ""}
+              </ListItemText>
             </ListItem>
           );
         })}
@@ -754,4 +772,18 @@ function onMouseUp(e: MouseEvent) {
 function moveWindow() {
   ipcRenderer.send("windowMoving", { mouseX, mouseY });
   animationId = requestAnimationFrame(moveWindow);
+}
+
+export function BetaTag(): JSX.Element {
+  return (
+    <>
+      &nbsp;
+      <Chip
+        label={tr("Beta")}
+        size={"small"}
+        color={"warning"}
+        variant={"outlined"}
+      />
+    </>
+  );
 }

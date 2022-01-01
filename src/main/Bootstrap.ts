@@ -8,6 +8,7 @@ import {
   getString,
   loadConfigSync,
 } from "../modules/config/ConfigSupport";
+import { setBeacon } from "../modules/selfupdate/Beacon";
 import { registerBackgroundListeners } from "./Background";
 
 console.log("Starting Alicorn!");
@@ -84,7 +85,17 @@ async function whenAppReady() {
     show: false,
     backgroundColor: "#fff",
   });
+  mainWindow.setAspectRatio(1.92);
   mainWindow.setMenu(null);
+  mainWindow.webContents.on("did-navigate-in-page", () => {
+    mainWindow?.webContents.setZoomLevel(0);
+  });
+  mainWindow.webContents.on("paint", () => {
+    mainWindow?.webContents.setZoomLevel(0);
+  });
+  mainWindow.webContents.on("did-finish-load", () => {
+    mainWindow?.webContents.setZoomLevel(0);
+  });
   console.log("Loading resources...");
   console.log("Registering event listeners...");
   registerBackgroundListeners();
@@ -112,6 +123,12 @@ async function whenAppReady() {
     mainWindow?.on("move", () => {
       mainWindow?.webContents.send("mainWindowMoved", mainWindow.getPosition());
     });
+    console.log("Placing beacon!");
+    try {
+      await setBeacon();
+    } catch (e) {
+      console.log(e);
+    }
     console.log("All caught up! Alicorn is now initialized.");
     if (getBoolean("dev")) {
       console.log("Development mode detected, opening devtools...");
@@ -150,6 +167,7 @@ async function whenAppReady() {
     });
   }
   await mainWindow.loadFile(path.resolve(appPath, "Renderer.html"));
+  mainWindow?.webContents.setZoomLevel(0);
 }
 
 function main() {

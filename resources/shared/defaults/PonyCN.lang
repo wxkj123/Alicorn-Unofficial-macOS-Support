@@ -114,13 +114,13 @@ Pff 软件安装器
 
 更新失败……不过别担心！你的文件丝毫不受影响。
 
+# Beta
+
+实验特性
+
 # MainMenu.UtilitiesIndex
 
 打开实用工具
-
-# MainMenu.Help
-
-寻求帮助
 
 # MainMenu.GoBack
 
@@ -133,10 +133,6 @@ Pff 软件安装器
 # MainMenu.QuickManageAccount
 
 管理帐户
-
-# MainMenu.QuickServerList
-
-显示服务器列表
 
 # MainMenu.Exit
 
@@ -160,7 +156,7 @@ Pff 软件安装器
 
 # Operating.ClickToDebug
 
-如果希望向他人寻求帮助，单击本窗口的任何位置可打开日志。
+如果希望向他人寻求帮助，请单击我（如果你会用 Devtools 的话）。
 
 # Operating.PleaseWait
 
@@ -205,6 +201,10 @@ Pff 软件安装器
 # Operating.PleaseWaitDetail
 
 正在进行操作……这可能需要几分钟。
+
+# CoreInfo.IgnoreCorrupted
+
+不显示损坏核心
 
 # CoreInfo.CannotDestroy
 
@@ -389,30 +389,6 @@ Yggdrasil 帐户
 # ReadyToLaunch.DefaultJava
 
 默认（尝试自动选择）
-
-# ReadyToLaunch.Status.Pending
-
-准备就绪
-
-# ReadyToLaunch.Status.CheckingFiles
-
-检查游戏文件……
-
-# ReadyToLaunch.Status.PreparingMods
-
-Mod 兼容性检查……
-
-# ReadyToLaunch.Status.PerformingAuth
-
-验证帐户……
-
-# ReadyToLaunch.Status.GeneratingArgs
-
-生成启动指令……
-
-# ReadyToLaunch.Status.Finished
-
-已启动 Minecraft
 
 # ReadyToLaunch.Status.Short.Pending
 
@@ -720,7 +696,7 @@ Alicorn 启动器 {AppVersion}（内核版本 {UpdatorVersion}）
 
 # VersionView.Copyright
 
-以下内容为著作权声明的简体中文翻译，不可被视为原文本的替代。Alicorn 的开发人员拥有最终解释权。\n\nAlicorn 启动器是自由软件，复制、修改和重新分发等行为应遵循 GNU GENERAL PUBLIC LICENSE Version 3.0 许可证（或以后的版本）。\nCopyright (C) 2021 Andy K Rarity Sparklight\n\n该程序是自由软件：你可以根据自由软件基金会发布的 GNU 通用公共许可证（第三版或以后）的条款重新分发和/或修改它。\n分发此程序是希望它有用，但不作任何保证；甚至没有对适销性或针对特定目的的适用性的暗示保证。有关更多详细信息，请参阅 GNU 通用公共许可证（第三版或以后）原文。\nAlicorn 中所引用的 Minecraft 相关图片等内容不是 Alicorn 的一部分，它们来自 Minecraft Wiki 并以 知识共享 署名-非商业性使用-相同方式分享 3.0（CC BY-NC-SA 3.0）协议授权，不适用 Alicorn 的 GNU 通用公共许可证（第三版或以后）。
+以下内容为著作权声明的简体中文翻译，不可被视为原文本的替代。Alicorn 的开发人员拥有最终解释权。\n\nAlicorn 启动器是自由软件，复制、修改和重新分发等行为应遵循 GNU GENERAL PUBLIC LICENSE Version 3.0 许可证（或以后的版本）。\nCopyright (C) 2021-2022 Andy K Rarity Sparklight\n\n该程序是自由软件：你可以根据自由软件基金会发布的 GNU 通用公共许可证（第三版或以后）的条款重新分发和/或修改它。\n分发此程序是希望它有用，但不作任何保证；甚至没有对适销性或针对特定目的的适用性的暗示保证。有关更多详细信息，请参阅 GNU 通用公共许可证（第三版或以后）原文。\nAlicorn 中所引用的 Minecraft 相关图片等内容不是 Alicorn 的一部分，它们来自 Minecraft Wiki 并以 知识共享 署名-非商业性使用-相同方式分享 3.0（CC BY-NC-SA 3.0）协议授权，不适用 Alicorn 的 GNU 通用公共许可证（第三版或以后）。
 
 # VersionView.Privacy
 
@@ -728,7 +704,7 @@ Alicorn 启动器 {AppVersion}（内核版本 {UpdatorVersion}）
 
 # VersionView.Credit
 
-@HTMLAlicorn 的创建离不开超过 505 个 NPM 可重用软件包，其中包括 Material UI、React、Electron 这些框架软件包，got、crypto-js、ajv 这些效用软件包，Webpack、TypeScript 这些构建软件包，以及许多许多被大量依赖的基础软件包。\nAlicorn 还要感谢包括 VSCodium 和 Vim 在内的开发工具，因为有它们，Alicorn 的开发效率成倍地提升。\n\n你是否想支持 Alicorn？或者只是想了解更多内容？欢迎访问 <a href="javascript:ashow('https://alc.pages.dev')">Alicorn Launcher 官方网站</a>
+@HTMLAlicorn 的创建离不开超过 500 个 NPM 可重用软件包，其中包括 Material UI、React、Electron 这些框架软件包，undici、crypto-js、ajv 这些效用软件包，Webpack、TypeScript 这些构建用软件包，以及许多许多被大量依赖的基础软件包。\nAlicorn 还要感谢包括 VSCodium 和 Vim 在内的开发工具，因为有它们，Alicorn 的开发效率成倍地提升。\n\n你是否想支持 Alicorn？或者只是想了解更多内容？欢迎访问 <a href="javascript:ashow('https://alc.pages.dev')">Alicorn Launcher 官方网站</a>
 
 # VersionView.FreeSoftwareClaim
 
@@ -736,7 +712,7 @@ Alicorn 启动器 {AppVersion}（内核版本 {UpdatorVersion}）
 
 # VersionView.SuperCowPower
 
-本启动器具有超级牛力。
+本 Alicorn 具有超级牛力。
 
 # ContainerManager.RootDir
 
@@ -899,7 +875,7 @@ Pff 正安装 Mod……
 
 # ContainerManager.AskClearDetail
 
-摧毁 {ID} 将同时摧毁其中的全部数据，包括存档、Mod 和其它任何内容！确定要这样做，{UserName}？\n{ID} 将永远失去（真的很久）！
+这将删除 {ID} 中的一切内容，此操作不可撤销！确定要这样做，{UserName}？\n{ID} 将永远失去（真的很久）！
 
 # ContainerManager.Yes
 
@@ -1284,14 +1260,6 @@ Undici（适合很少使用国外资源的玩家，且速度较快）
 # Options.download.lib.Fetch
 
 Fetch（适合大量下载国外资源的玩家，但速度较慢）
-
-# Options.system.ws-operation.title
-
-Alicorn 网络调用 ^
-
-# Options.system.ws-operation.desc
-
-允许 Web 脚本等通过一系列操作和 Alicorn 建立连接并直接调用 Alicorn 功能 - 请当心，恶意程序可能会滥用此功能！
 
 # Options.readyboom.cores.title
 
@@ -2261,6 +2229,10 @@ Mojang 版本
 
 ['{Config:updator.use-update}'=='false']不要担心升级！更新后的我就像暮光公主变成坎特拉女孩一样，虽然样子不同，但我不会忘了你的！
 
+拒绝 Mod 平台的广告。使用 Modrinth 而拒绝 Curseforge，就是在为大家贡献力量。
+
+['{Config:dev.experimental}'=='true']不要一边驾驶飞机，一边测试飞机的引擎……
+
 ['{Config:theme.background}'=='ACG']看多了 ACG 图片，会不会就不喜欢我了呢……
 
 ['{Config:dev.f12}'=='true']好好使用 DevTools，可不要弄出什么问题！
@@ -2284,6 +2256,8 @@ Mojang 版本
 ['{Config:interactive.i-have-a-crush-on-al}'=='true']我可是书虫！不然我怎么对付 Forge 的安装器呢？
 
 ['{Config:interactive.i-have-a-crush-on-al}'=='true']在你玩游戏的时候，我可没有偷懒，我在默默地看着你呢～
+
+['{Config:interactive.i-have-a-crush-on-al}'=='false']您还记得我吗？我？我记得每一位用户……
 
 # Welcome.TipName
 
@@ -2315,7 +2289,6 @@ Alicorn 随时都可能有更新！请记得常回来看看！
 @HTMLMinecraft <b>不是</b>一个傻瓜式操作的游戏 —— 特别是安装 Mod！
 @HTML<b style="color: red;">永远不要</b>在<b style="color: red;">任何</b>第三方服务器输入你的<b style="color: red;">任何</b>隐私信息！—— <b style="color: red;">这非常危险！</b>
 当你能够正常关闭游戏时，不要使用强制退出。
-遇到问题？可以单击上面的「寻求帮助」哦～
 我们支持自由软件，我们的终极目标是全人类的数字自由，一个没有非自由软件的世界。
 @HTMLAlicorn 的众多功能，都是由自由软件构成的！请支持我们 —— <b>简单到多使用一次 Firefox 或者 Fabric，<span style="color: red;">哪怕只有一次！</span></b>
 
@@ -2401,7 +2374,7 @@ Pff|也就是「Package File Finder」，Alicorn 用来搜索和安装 Mod 的�
 
 # PffFront.Failed
 
-获取失败：没能获取此 Mod，请再试一次，或至 Mod 平台手动安装它们。
+获取失败，若非网络故障，那就是该 Mod 不存在或不兼容
 
 # PffFront.Slug
 
@@ -3328,7 +3301,7 @@ END
 
 # Instruction.LaunchPad.3
 
-就这么简单！……如果需要更多信息，请访问 <帮助文档>，单击上面的 <寻求帮助> 就好。
+就这么简单！现在继续你的旅程吧！
 
 # Instruction.LaunchPad.4
 

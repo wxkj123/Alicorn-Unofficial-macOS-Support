@@ -33,7 +33,6 @@ import { setupMSAccountRefreshService } from "../modules/readyboom/AccountMaster
 import { setupHotProfilesService } from "../modules/readyboom/PrepareProfile";
 import { initEncrypt } from "../modules/security/Encrypt";
 import { getMachineUniqueID } from "../modules/security/Unique";
-import { setBeacon } from "../modules/selfupdate/Beacon";
 import { todayPing } from "../modules/selfupdate/Ping";
 import { checkUpdate, initUpdator } from "../modules/selfupdate/Updator";
 import { loadServers } from "../modules/server/ServerFiles";
@@ -94,7 +93,9 @@ try {
   console.log(`Alicorn ${pkg.appVersion} Renderer Process`);
   console.log("❤ From Andy K Rarity Sparklight");
   console.log("Sparklight is a girl - a filly, to be accurate.");
-  console.log("Alicorn Launcher Copyright (C) 2021 Andy K Rarity Sparklight");
+  console.log(
+    "Alicorn Launcher Copyright (C) 2021-2022 Andy K Rarity Sparklight"
+  );
   console.log(
     "This program comes with ABSOLUTELY NO WARRANTY; for details, please see 'resources/app/LICENSE'."
   );
@@ -199,7 +200,7 @@ try {
     void completeFirstRun(); // Not blocking
     void todayPing();
     // Heavy works and minor works
-    await Promise.allSettled([initVF(), preCacheJavaInfo(), setBeacon()]);
+    await Promise.allSettled([initVF(), preCacheJavaInfo()]);
     const t2 = new Date();
     console.log(
       "Delayed init tasks finished. Time elapsed: " +

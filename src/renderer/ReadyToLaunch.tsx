@@ -495,9 +495,6 @@ function Launching(props: {
               `Container=${props.container.id}`
             )}
       </Typography>
-      <Typography variant={"h6"} className={classes.primaryText} gutterBottom>
-        {tr("ReadyToLaunch.Status." + status)}
-      </Typography>
       <br />
 
       <Stepper
@@ -648,7 +645,6 @@ function Launching(props: {
           }
         />
       </Tooltip>
-      <br />
       <br />
       <SpecialKnowledge />
       <OpenWorldDialog
@@ -1694,7 +1690,7 @@ function getProfileRelatedID(hash: string): string {
   return sessionStorage.getItem("MinecraftID" + hash) || "";
 }
 
-const CODE_REGEX = /(?<=\?code=)[^&]+/gi;
+const CODE_REGEX = /(?<=\?code=)[^&]+/i;
 
 function AskURLDialog(): JSX.Element {
   const [url, setUrl] = useState("");
