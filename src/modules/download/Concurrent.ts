@@ -1,8 +1,12 @@
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
+import { submitWarn } from "../../renderer/Message";
+import { tr } from "../../renderer/Translator";
 import { basicHash } from "../commons/BasicHash";
+import { alterPath } from "../commons/FileUtil";
 import { getBoolean, getString } from "../config/ConfigSupport";
+import { getBasePath } from "../config/PathSolve";
 import {
   AbstractDownloader,
   DownloadMeta,
@@ -13,10 +17,20 @@ import { getFileWriteStream, getTimeoutController } from "./RainbowFetch";
 import { Serial } from "./Serial";
 import { getHash } from "./Validate";
 
-const TEMP_SAVE_PATH_ROOT = path.join(os.tmpdir(), "alicorn-download");
+let TEMP_SAVE_PATH_ROOT: string;
+let CONC_AVAILABLE = true;
 
 export async function initConcurrentDownloader(): Promise<void> {
-  await fs.ensureDir(TEMP_SAVE_PATH_ROOT);
+  TEMP_SAVE_PATH_ROOT = await alterPath(
+    path.join(os.tmpdir(), "alicorn-download"),
+    path.join(os.homedir(), "alicorn-download"),
+    path.join(getBasePath(), "alicorn-download")
+  );
+  if (TEMP_SAVE_PATH_ROOT.length > 0) {
+    await fs.ensureDir(TEMP_SAVE_PATH_ROOT);
+  } else {
+    CONC_AVAILABLE = false;
+  }
 }
 
 export class Concurrent extends AbstractDownloader {
@@ -30,7 +44,10 @@ export class Concurrent extends AbstractDownloader {
     meta: DownloadMeta,
     overrideTimeout?: boolean
   ): Promise<DownloadStatus> {
-    if (getString("download.primary-downloader") !== "Concurrent") {
+    if (
+      !CONC_AVAILABLE ||
+      getString("download.primary-downloader") !== "Concurrent"
+    ) {
       return await Serial.getInstance().downloadFile(meta);
     }
     try {
@@ -63,7 +80,13 @@ async function sealAndVerify(
   hash: string,
   size: number
 ) {
-  const wStream = fs.createWriteStream(savePath, { mode: 0o777 });
+  let wStream: fs.WriteStream;
+  try {
+    wStream = fs.createWriteStream(savePath, { mode: 0o777 });
+  } catch (e) {
+    submitWarn(tr("System.EPERM"));
+    throw e;
+  }
   for (const c of chunks) {
     const pt = path.join(
       TEMP_SAVE_PATH_ROOT,
@@ -155,14 +178,20 @@ function downloadSingleChunk(
       const [ac, sti] = getTimeoutController(
         overrideTimeout ? 0 : getConfigOptn("timeout", 5000)
       );
-      const f = getFileWriteStream(
-        tmpSavePath,
-        sti,
-        () => {
-          reject();
-        },
-        overrideTimeout ? 0 : getConfigOptn("timeout", 5000)
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let f: WritableStream<any>;
+      try {
+        f = getFileWriteStream(
+          tmpSavePath,
+          sti,
+          () => {
+            reject();
+          },
+          overrideTimeout ? 0 : getConfigOptn("timeout", 5000)
+        );
+      } catch {
+        throw "Failed to write! Path: " + tmpSavePath;
+      }
       const r = await fetch(url, {
         signal: ac.signal,
         method: "GET",
@@ -180,6 +209,7 @@ function downloadSingleChunk(
           try {
             await fs.remove(tmpSavePath);
           } catch {}
+          console.log(e);
           throw e;
         }
       } else {
@@ -187,10 +217,11 @@ function downloadSingleChunk(
         throw "Body is empty!";
       }
     })()
-      .then((b) => {
-        resolve(b);
+      .then(() => {
+        resolve();
       })
       .catch((e) => {
+        console.log(e);
         reject(e);
       });
   });

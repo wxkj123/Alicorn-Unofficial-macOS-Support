@@ -16,6 +16,10 @@ import {
   getNumber,
   loadConfig,
 } from "../modules/config/ConfigSupport";
+import {
+  bindCurseListeners,
+  closeCurseWindow,
+} from "../modules/pff/curseforge/CurseController";
 import { getMainWindow, getMainWindowUATrimmed } from "./Bootstrap";
 const LOGIN_START =
   "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&scope=service%3A%3Auser.auth.xboxlive.com%3A%3AMBI_SSL&redirect_uri=https%3A%2F%2Flogin.live.com%2Foauth20_desktop.srf";
@@ -25,6 +29,7 @@ const ERROR_REGEX = /(?<=\?error=)[^&]+/gi;
 const ERROR_DESCRIPTION = /(?<=&error_description=)[^&]+/gi;
 
 export function registerBackgroundListeners(): void {
+  bindCurseListeners();
   ipcMain.on("reload", () => {
     getMainWindow()?.webContents.removeAllListeners();
     app.relaunch();
@@ -49,6 +54,9 @@ export function registerBackgroundListeners(): void {
     try {
       getMainWindow()?.destroy();
     } catch {}
+    try {
+      closeCurseWindow();
+    } catch {}
 
     console.log("All windows are closed.");
     console.log("Waiting for application exit...");
@@ -61,8 +69,8 @@ export function registerBackgroundListeners(): void {
   });
   ipcMain.on("SOS", (_i, e) => {
     dialog.showErrorBox(
-      "Alicorn has crashed!",
-      "An error has occurred, consider REPORT or REINSTALL.\nError message is:\n\n" +
+      "Unexpected Error Happened!",
+      "A fatal error has been detected.\nAlicorn 检测到一个未捕获的错误。\nThis should not have happened. Please report it to us.\n这在正常情况下不会发生，建议您向我们报告。\n\nError message is:\n错误信息如下：\n\n" +
         String(e)
     );
   });

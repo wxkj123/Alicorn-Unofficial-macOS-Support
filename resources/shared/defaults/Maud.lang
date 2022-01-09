@@ -352,14 +352,6 @@ Alicorn 是自由软件。
 
 @HTML兼容性有点问题，可能会<b>出现错误</b>。
 
-# VersionView.AuthorName
-
-开发人员：
-
-# VersionView.Authors
-
-Andy K Rarity Sparklight
-
 # VersionView.Description
 
 @HTML你好啊。
@@ -647,10 +639,6 @@ Beta
 # AccountManager.Note
 
 @HTMLMicrosoft 帐户无需验证。可以将验证按钮拖向此处。
-
-# JavaSelector.External
-
-已在外部页面打开，请查看……
 
 # JavaSelector.CustomAdd
 

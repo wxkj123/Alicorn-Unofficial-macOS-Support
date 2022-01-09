@@ -1,5 +1,8 @@
+import fs from "fs-extra";
 import StreamZip from "node-stream-zip";
 import toml from "toml";
+import { submitWarn } from "../../renderer/Message";
+import { tr } from "../../renderer/Translator";
 import { isNull, safeGet } from "../commons/Null";
 import { MinecraftContainer } from "../container/MinecraftContainer";
 
@@ -28,7 +31,6 @@ enum ModLoader {
 }
 
 export { ModLoader };
-
 // Load mod info
 export async function loadModInfo(
   modJar: string,
@@ -37,32 +39,41 @@ export async function loadModInfo(
   try {
     const ret: ModInfo = {};
     ret.fileName = container.getModJar(modJar);
-    const zip = new StreamZip.async({ file: ret.fileName });
+    let d: number;
     try {
-      const d = await zip.entryData(FABRIC_MOD_JSON);
+      d = await fs.open(ret.fileName, "r"); // Control this manually
+    } catch (e) {
+      submitWarn(tr("System.EPERM"));
+      throw e;
+    }
+    const zip = new StreamZip.async({
+      fd: d,
+    });
+    try {
+      const d2 = await zip.entryData(FABRIC_MOD_JSON);
       ret.loader = ModLoader.FABRIC;
-      loadFabricInfo(JSON.parse(escapeQuote(d.toString())), ret);
-      void zip.close();
+      loadFabricInfo(JSON.parse(escapeQuote(d2.toString())), ret);
+      void fs.close(d);
       return ret;
     } catch {}
 
     try {
-      const d = await zip.entryData(META_INF + "/" + MODS_TOML);
+      const d2 = await zip.entryData(META_INF + "/" + MODS_TOML);
       ret.loader = ModLoader.FORGE;
-      loadTomlInfo(toml.parse(d.toString()), ret);
-      void zip.close();
+      loadTomlInfo(toml.parse(d2.toString()), ret);
+      void fs.close(d);
       return ret;
     } catch {}
 
     try {
-      const d = await zip.entryData(MCMOD_INFO);
+      const d2 = await zip.entryData(MCMOD_INFO);
       ret.loader = ModLoader.FORGE;
-      loadMCMODInfo(JSON.parse(escapeQuote(d.toString())), ret);
-      void zip.close();
+      loadMCMODInfo(JSON.parse(escapeQuote(d2.toString())), ret);
+      void fs.close(d);
       return ret;
     } catch {}
     // Bad Loader
-    void zip.close();
+    void fs.close(d);
     return {
       fileName: container.getModJar(modJar),
       loader: ModLoader.UNKNOWN,

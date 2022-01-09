@@ -70,6 +70,10 @@ Pff 软件安装器
 
 终末之末
 
+# System.EPERM
+
+Alicorn 无法读/写 {Target}，请检查此目录的权限，相关操作已经中止。
+
 # System.Offline
 
 似乎已断开与互联网的连接……
@@ -201,6 +205,22 @@ Pff 软件安装器
 # Operating.PleaseWaitDetail
 
 正在进行操作……这可能需要几分钟。
+
+# CoreInfo.Sorting.HL
+
+按版本从高到低
+
+# CoreInfo.Sorting.LH
+
+按版本从低到高
+
+# CoreInfo.Sorting.USE
+
+按使用次数
+
+# CoreInfo.Sorting.TIME
+
+按最后访问时间
 
 # CoreInfo.IgnoreCorrupted
 
@@ -564,6 +584,24 @@ Minecraft 实例（看上去）没有正常退出，你想要对本次启动进�
 
 # ReadyToLaunch.WaitingText
 
+贴心提示古来多，其中有用又几条？
+
+用木炭烧木头，获得更多木炭。
+
+有些宝石山必须挖穿，有些传送们总得走过。
+
+人类不喜欢亲手撰写，总是想着复制粘贴。
+
+不是什么都能通过重启解决，观察者也不能看透每个世界。
+
+本小马会一直陪着你的……只要你不卸掉 Alicorn 的话！
+
+天上的飞机只与你相隔十千米，出门访一位旧友，不如抬头望一眼陌生人。
+
+我一个倒立，谁能说我没有举起地球？
+
+费尽力气扇动翅膀，不如索性推动大地。
+
 暴风雨的来临需要酝酿，新冒险的开始需要准备。
 
 这可能需要一段时间，不过只有你第一次玩某个版本时会这样。
@@ -613,6 +651,26 @@ Minecraft 和我的世界真的不是一个东西！
 可以，但没必要。
 
 哪里有什么奇技淫巧，苍穹木曾经也是树苗。
+
+用钻石挖钻石，获得更多钻石。
+
+手持两把锟斤拷，口中直呼烫烫烫。
+
+上次看到这条 Tips 还是在上次～
+
+18 次游戏崩溃会产生什么？可不是 18 份崩溃报告哦！
+
+总有人想着改变世界，却少有人想着改变自己。
+
+为了 Mod 的未来，使用 Modrinth，拒绝 Curseforge。
+
+61096da20861084f1e6a442d939717a8（这是啥？）
+
+我们在飞马的头上粘了一只角！
+
+有 3587 种热带鱼！
+
+Alicorn 每周都有新版本！
 
 「能用 JS 改写的，终将用 JS 改写」—— Jeff Atwood
 
@@ -696,7 +754,7 @@ Alicorn 启动器 {AppVersion}（内核版本 {UpdatorVersion}）
 
 # VersionView.Copyright
 
-以下内容为著作权声明的简体中文翻译，不可被视为原文本的替代。Alicorn 的开发人员拥有最终解释权。\n\nAlicorn 启动器是自由软件，复制、修改和重新分发等行为应遵循 GNU GENERAL PUBLIC LICENSE Version 3.0 许可证（或以后的版本）。\nCopyright (C) 2021-2022 Andy K Rarity Sparklight\n\n该程序是自由软件：你可以根据自由软件基金会发布的 GNU 通用公共许可证（第三版或以后）的条款重新分发和/或修改它。\n分发此程序是希望它有用，但不作任何保证；甚至没有对适销性或针对特定目的的适用性的暗示保证。有关更多详细信息，请参阅 GNU 通用公共许可证（第三版或以后）原文。\nAlicorn 中所引用的 Minecraft 相关图片等内容不是 Alicorn 的一部分，它们来自 Minecraft Wiki 并以 知识共享 署名-非商业性使用-相同方式分享 3.0（CC BY-NC-SA 3.0）协议授权，不适用 Alicorn 的 GNU 通用公共许可证（第三版或以后）。
+以下内容为著作权声明的简体中文翻译，不可被视为原文本的替代。Alicorn 的开发人员拥有最终解释权。\n\nAlicorn 启动器是自由软件，复制、修改和重新分发等行为应遵循 GNU GENERAL PUBLIC LICENSE Version 3.0 许可证（或以后的版本）。\nCopyright (C) 2021-2022 Annie K Rarity Sparklight\n\n该程序是自由软件：你可以根据自由软件基金会发布的 GNU 通用公共许可证（第三版或以后）的条款重新分发和/或修改它。\n分发此程序是希望它有用，但不作任何保证；甚至没有对适销性或针对特定目的的适用性的暗示保证。有关更多详细信息，请参阅 GNU 通用公共许可证（第三版或以后）原文。\nAlicorn 中所引用的 Minecraft 相关图片等内容不是 Alicorn 的一部分，它们来自 Minecraft Wiki 并以 知识共享 署名-非商业性使用-相同方式分享 3.0（CC BY-NC-SA 3.0）协议授权，不适用 Alicorn 的 GNU 通用公共许可证（第三版或以后）。
 
 # VersionView.Privacy
 
@@ -1125,9 +1183,9 @@ Minecraft 版本号
 
 @HTML如果你使用 Microsoft 帐户或本地帐户，则无需在此配置，请<b>直接启动游戏</b>，当启动时将（如果必要）询问你相关的信息。\n「将此按钮拖动至启动器」已受支持，将按钮拖向启动器的任意位置并松蹄就好。
 
-# JavaSelector.External
+# JavaSelector.FailedToInstall
 
-我无法在此自动安装，请在打开的页面中自行下载安装～
+获取 Java 失败，请检查网络连接或目录权限。\n……或者手动安装 Java 并重新扫描。
 
 # JavaSelector.CustomAdd
 
@@ -1153,13 +1211,13 @@ Minecraft 版本号
 
 重新查找 Java 运行时
 
-# JavaSelector.GetNew
+# JavaSelector.BuiltIn
 
-下载 AdoptOpenJDK JRE 17（Minecraft 18 及以上必须使用）
+快速安装 Java 并自动设置
 
-# JavaSelector.GetOld
+# JavaSelector.HintBuiltIn
 
-下载 AdoptOpenJDK JRE V8（Minecraft 12 及以下必须使用）
+如果你尚未安装 Java 或者 Java 版本不对，并且想要现在重新安装 Java，可以使用下面的按钮。
 
 # JavaSelector.Warn32
 
@@ -1285,6 +1343,14 @@ Alicorn Ping ^
 
 这种几乎不带任何信息的 Ping 可以让 ThatRarityEG 估计活跃用户数\nAlicorn Ping 仅收集一条不可逆的、单向加密过的哈希用于区分不同客户端。
 
+# Options.features.cursepp.title
+
+Curseforge ++
+
+# Options.features.cursepp.desc
+
+使用 Alicorn Magic 回到过去调用 Curseforge 的 API，这样 Alicorn 就不用修改代码，只需要建造时间机器（认真
+
 # Options.features.tips-of-today.title
 
 Alicorn 使用技巧
@@ -1359,7 +1425,7 @@ Bing 每日背景图
 
 # Options.theme.desc
 
-修改主题配色 - 带 * 的不利于视觉健康，请谨慎使用，当感觉眼睛不舒服的时候请切换到「褪色灰」以避免视力损伤。另请注意部分深色主题可能不利于操作。
+修改主题配色 - 带 * 的不利于视觉健康，请谨慎使用，另请注意部分深色主题可能不利于操作。
 
 # Options.theme.Default
 
@@ -1436,6 +1502,10 @@ Bing 每日背景图
 # Options.theme.OldPink
 
 灰色粉
+
+# Options.theme.PinkDark
+
+粉色灰
 
 # Options.theme.WhatGreenDark
 
@@ -1860,22 +1930,6 @@ Pff Mod 更新模式
 # Options.pff.upgrade-mode.Keep
 
 保留两者
-
-# Options.pff.first-source.title
-
-Pff 优先搜索源
-
-# Options.pff.first-source.desc
-
-选择优先搜索 Mod 的软件源 - 通常，当安装的 Mod 不是你想要的时候，切换源可能有用
-
-# Options.pff.first-source.Curseforge
-
-Curseforge
-
-# Options.pff.first-source.Modrinth
-
-Modrinth
 
 # Options.pff.cache-root.title
 
@@ -2356,6 +2410,10 @@ eee|一种梗语言，大致就是把每个字都改成 e。幸好，我不会�
 
 Pff|也就是「Package File Finder」，Alicorn 用来搜索和安装 Mod 的工具。具有 Pff Front 和 Pff Visual 两个组件，前者通过 ID 直接安装 Mod，后者通过搜索查找 ID。具有类似 Maven 的缓存能力。
 
+# PffFront.ReloadToRenew
+
+Mod 信息直到下一次进入 Pff 时才会刷新，单击我可以立即刷新。
+
 # PffFront.WarnNoCache
 
 警告 - 你没有为 Pff 设置下载缓存，二次安装 Mod 时将无法得到加速！
@@ -2524,29 +2582,13 @@ BMCLAPI
 
 最重要的 Minecraft 资源下载镜像，如果它都不能工作了……今天就休息下，和我聊聊天吧～
 
-# Utilities.NetCheck.SiteName.AlicornAccess
-
-Alicorn 轻松访问镜像
-
-# Utilities.NetCheck.SiteDesc.AlicornAccess
-
-轻松获取各种核心的版本列表，尤其是 Forge 的……但是，果真那么「轻松」吗？
-
-# Utilities.NetCheck.SiteName.CurseAPI
-
-CurseForge 接口
-
-# Utilities.NetCheck.SiteDesc.CurseAPI
-
-大多数 Mod 创作者将 Mod 发布在这里，此网站的连通性直接决定 Pff 和整合包安装器的工作效率
-
 # Utilities.NetCheck.SiteName.Modrinth
 
 Modrinth 接口
 
 # Utilities.NetCheck.SiteDesc.Modrinth
 
-未来主流 Mod 发布之处，此网站的连通性影响着 Pff 和整合包安装器的工作效率
+主流 Mod 发布之处，此网站的连通性影响着 Pff 和整合包安装器的工作效率
 
 # Utilities.NetCheck.SiteName.MojangAuth
 
@@ -3087,13 +3129,14 @@ Minecraft 默认位置
 
 # Statistics.Crash
 
-你可能不知道，游戏崩溃了 {Value} 次……
+游戏已经崩溃了 {Value} 次……
 
 # Statistics.Crash.As
 
 [{Value}>1000]……比 Alicorn 开发过程中的更多！
 ……但不会是最后一次……
 [{Value}==0]……好希望永远这样……
+我们的错（不是 Alicorn 的）。
 
 # Statistics.Launch
 
@@ -3117,7 +3160,7 @@ Minecraft 默认位置
 
 # FirstRun.JavaConfigured
 
-Java 配置成功！
+已更新 Java 信息
 
 # FirstRun.Preparing
 
@@ -3125,15 +3168,23 @@ Java 配置成功！
 
 # FirstRun.FetchingJava
 
-正在获取 Java 安装包……
+正在获取 Java……
 
 # FirstRun.ConfiguringJava
 
-正在配置 Java……
+正在查询 Java 信息……
 
-# FirstRun.InstallingJava
+# FirstRun.JavaInstalled
 
-你现在可以使用此安装程序安装 Java……
+耶！我们已经成功安装了所需的 Java 版本！
+
+# FirstRun.FailedJava
+
+自动安装失败，稍后你可以前往「Java 选择器」页面重新安装。
+
+# Instruction.Welcome.-1
+
+END
 
 # Instruction.Welcome.0
 
@@ -3141,7 +3192,7 @@ Java 配置成功！
 
 # Instruction.Welcome.1
 
-现在我将向你介绍 Alicorn 的 <几个基本操作>。动动你的鼠标，我们快速完成这个过程。
+现在我将向你介绍 Alicorn 的 <几个基本操作>。动动你的鼠标，我们快速完成这个过程。或者，你可以按下 <右键> 跳过引导。
 
 # Instruction.Welcome.2
 
@@ -3164,6 +3215,10 @@ Alicorn 默认安装了 Minecraft 1.17.1，可以在 <核心列表> 中直接启
 如果需要其它版本的核心，你需要 <安装核心>，然后再去启动。@@@MainMenuInstallCore
 
 # Instruction.Welcome.7
+
+END
+
+# Instruction.JavaSelector.-1
 
 END
 
@@ -3195,6 +3250,10 @@ Minecraft 1.18 及更高版本需要 <Java 17> 才能运行，1.17 需要 <Java 
 
 END
 
+# Instruction.NoJava.-1
+
+END
+
 # Instruction.NoJava.0
 
 让我看看……嗯，就快好了，不过还有一件重要的事情需要你处理……
@@ -3205,21 +3264,17 @@ END
 
 # Instruction.NoJava.2
 
-……当然，我早就想到会有这种问题……所以这里有两份 <Java 安装程序>，是为你准备的。
+……当然，我早就想到会有这种问题……没关系，这次就让我来吧。
 
 # Instruction.NoJava.3
 
-如果你 <不能 100% 确定> 你已经安装了合适的 Java，请使用它们完成安装。
+安装完 Java 后就可以去 <安装核心> 那里安装新的 Minecraft 咯！@@@MainMenuInstallCore
 
 # Instruction.NoJava.4
 
-好啦，祝你好运！安装完 Java 后就可以去 <安装核心> 那里安装新的 Minecraft 咯！@@@MainMenuInstallCore
+END
 
-# Instruction.NoJava.5
-
-我们会在那里再见面的，再会！@@@MainMenuInstallCore
-
-# Instruction.NoJava.6
+# Instruction.HavePack.-1
 
 END
 
@@ -3239,6 +3294,10 @@ END
 
 END
 
+# Instruction.JavaOK.-1
+
+END
+
 # Instruction.JavaOK.0
 
 好啦，我要说的也就这么多啦，你现在可以去 <安装核心> 那里安装新的 Minecraft～@@@MainMenuInstallCore
@@ -3248,6 +3307,10 @@ END
 我们会在那里再见面的，再会！@@@MainMenuInstallCore
 
 # Instruction.JavaOK.2
+
+END
+
+# Instruction.InstallCore.-1
 
 END
 
@@ -3287,6 +3350,10 @@ Fabric 和 Forge <不兼容>！使用 Fabric 的 Mod 只能通过 Fabric 加载�
 
 END
 
+# Instruction.LaunchPad.-1
+
+END
+
 # Instruction.LaunchPad.0
 
 欢迎来到 <启动台>！在这里你可以选择一个核心来启动……或者别的操作。
@@ -3304,6 +3371,10 @@ END
 就这么简单！现在继续你的旅程吧！
 
 # Instruction.LaunchPad.4
+
+END
+
+# Instruction.ReadyToLaunch.-1
 
 END
 
@@ -3341,7 +3412,7 @@ Alicorn 的开发道路上，收到过不少来自个人、组织和企业的帮
 
 # EOE.Orgs
 
-MCBBS（Minecraft 中文论坛）……这里是热爱 MC 群体的天堂。\nFree Software Foundation……我们一同为自由软件而奋斗。\nGitHub……软件在这里诞生。\nStack Overflow……它解决了我们很多的问题。\nNode.js……JS 因你而不同。\nTypeScript……从混乱到有序的快速通道。\nMinecraft Wiki……玩家所认可的最强 Minecraft Wiki。\nMaterial UI……只做组件，而且做得很好。\nWiki.vg……快速解码帐户验证的奥秘。\nElectron……不止于浏览器！\nWebpack……打包，优化，压缩。\nBMCLAPI……下载速度提升 80% 的最强镜像！\nUndici……这就是 WASM，这就是 Node！\nFabricMC……拥有未来的 Mod，开创新的时代。\nIris Shaders……更高更妙的光影和高清修复！\nGaz492 Curseforge API……它打开了一扇充满光明的大门。\nJsDelivr……走遍天涯海角，Web 始终在你身边。\nAdobe Source Hans Sans 和 Ubuntu Mono……渲染不够，字体来凑！\nAuthlib Injector……Yggdrasil 始终为你让一条路。SkinView3D……新一代皮肤 3D 显示。\nMLPVector……颜色，但也不是颜色。\nVSCodium……纯净、自由的高效前端 IDE。\nMDN Web Docs……Mozilla 的 Web 开发参考。\n\n……还有许多许多值得我们感谢，只是限于篇幅未能列举……
+MCBBS（Minecraft 中文论坛）……这里是热爱 MC 群体的天堂。\nFree Software Foundation……我们一同为自由软件而奋斗。\nGitHub……软件在这里诞生。\nStack Overflow……它解决了我们很多的问题。\nNode.js……JS 因你而不同。\nTypeScript……从混乱到有序的快速通道。\nMinecraft Wiki……玩家所认可的最强 Minecraft Wiki。\nMaterial UI……只做组件，而且做得很好。\nwiki.vg……快速解码帐户验证的奥秘。\nElectron……不止于浏览器！\nWebpack……打包，优化，压缩。\nBMCLAPI……下载速度提升 80% 的最强镜像！\nundici……这就是 WASM，这就是 Node！\nFabricMC……拥有未来的 Mod，开创新的时代。\nIris Shaders……更高更妙的光影和高清修复！\njsDelivr……走遍天涯海角，Web 始终在你身边。\nAdobe Source Hans Sans 和 Ubuntu Mono……渲染不够，字体来凑！\nAuthlib Injector……Yggdrasil 始终为你让一条路。SkinView3D……新一代皮肤 3D 显示。\nMLPVector……颜色，但也不是颜色。\nVSCodium……纯净、自由的高效前端 IDE。\nMDN Web Docs……Mozilla 的 Web 开发参考。\n\n……还有许多许多值得我们感谢，只是限于篇幅未能列举……
 
 # EOE.StoryTitle
 

@@ -1,5 +1,7 @@
 import fs from "fs-extra";
 import { PassThrough, Readable } from "stream";
+import { submitWarn } from "../../renderer/Message";
+import { tr } from "../../renderer/Translator";
 import { WatchDog } from "../commons/WatchDog";
 import { getNumber } from "../config/ConfigSupport";
 import { MirrorChain } from "./Mirror";
@@ -10,6 +12,15 @@ export function getGuardStream(
 ): PassThrough {
   let dog: WatchDog | null = null;
   const s = new PassThrough();
+  f.on("error", (e) => {
+    dog?.kill();
+    f.close();
+    s.emit("error", "Stream ERR: " + e);
+  });
+  f.on("finish", () => {
+    dog?.kill();
+    f.close();
+  });
   if (timeout > 0) {
     dog = new WatchDog(timeout * 2, () => {
       f.close();
@@ -32,7 +43,13 @@ export function getFileWriteStream(
   timeout = 0
 ): WritableStream {
   let dog: WatchDog | null = null;
-  const f = fs.createWriteStream(pt, { mode: 0o777 });
+  let f: fs.WriteStream;
+  try {
+    f = fs.createWriteStream(pt, { mode: 0o777 });
+  } catch (e) {
+    submitWarn(tr("System.EPERM"));
+    throw e;
+  }
   if (timeout > 0) {
     dog = new WatchDog(timeout * 2, () => {
       f.close();
@@ -40,6 +57,15 @@ export function getFileWriteStream(
     });
   }
   let p = true;
+  f.on("error", () => {
+    dog?.kill();
+    f.close(); // Close anyway
+    thrower();
+  });
+  f.on("finish", () => {
+    dog?.kill();
+    f.close(); // Close anyway
+  });
   return new WritableStream({
     write(chk) {
       if (p) {
