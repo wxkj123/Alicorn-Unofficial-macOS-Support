@@ -12,7 +12,9 @@ import {
   Info,
   ManageAccounts,
   Menu,
+  Mic,
   PowerSettingsNew,
+  Psychology,
   Refresh,
   Settings,
   ShowChart,
@@ -40,6 +42,7 @@ import { makeStyles } from "@mui/styles";
 import { ipcRenderer } from "electron";
 import React, { useEffect, useRef, useState } from "react";
 import { Route } from "react-router-dom";
+import { registerFunc } from "../modules/boticorn/FTable";
 import { safeGet } from "../modules/commons/Null";
 import {
   getBoolean,
@@ -67,6 +70,8 @@ import { InstallCore } from "./InstallCore";
 import { Instruction, isInstBusy, startInst } from "./Instruction";
 import { JavaSelector } from "./JavaSelector";
 import { LaunchPad } from "./LaunchPad";
+import { Boticorn } from "./linkage/Boticorn";
+import { CadanceControlPanel, terminateCadanceProc } from "./linkage/Cadance";
 import { YNDialog2 } from "./OperatingHint";
 import { OptionsPage } from "./Options";
 import { PffFront } from "./PffFront";
@@ -526,6 +531,8 @@ export function App(): JSX.Element {
             path={"/AccountManager/:adding?/:server?"}
             component={YggdrasilAccountManager}
           />
+          <Route path={"/Cadance"} component={CadanceControlPanel} />
+          <Route path={"/Boticorn"} component={Boticorn} />
           <Route path={"/JavaSelector"} component={JavaSelector} />
           <Route path={"/Options"} component={OptionsPage} />
           <Route path={"/CrashReportDisplay"} component={CrashReportDisplay} />
@@ -650,6 +657,7 @@ export function App(): JSX.Element {
   );
 }
 
+registerFunc({ exitApp });
 async function exitApp(): Promise<void> {
   remoteHideWindow();
   await ipcRenderer.invoke("markLoginItem", getBoolean("auto-launch"));
@@ -665,15 +673,17 @@ const PAGES_ICONS_MAP: Record<string, JSX.Element> = {
   ContainerManager: <AllInbox />,
   JavaSelector: <ViewModule />,
   AccountManager: <AccountCircle />,
-  ServerList: <Dns />,
+  Cadance: <Mic />,
+  Boticorn: <Psychology />,
   UtilitiesIndex: <Handyman />,
   Statistics: <ShowChart />,
   Options: <Settings />,
+  ServerList: <Dns />,
   Version: <Info />,
   TheEndingOfTheEnd: <ImportContacts />,
 };
 
-const BETAS = ["ServerList"];
+const BETAS = ["ServerList", "Boticorn", "Cadance"];
 
 function PagesDrawer(props: {
   open: boolean;
@@ -713,7 +723,6 @@ function PagesDrawer(props: {
 
 export function remoteHideWindow(): void {
   console.log("Preparing to exit!");
-
   ipcRenderer.send("hideWindow");
 }
 
@@ -739,6 +748,7 @@ export async function intervalSaveData(): Promise<void> {
   await saveVF();
   await saveServers();
   saveStatistics();
+  terminateCadanceProc();
   console.log("All chunks are saved.");
 }
 

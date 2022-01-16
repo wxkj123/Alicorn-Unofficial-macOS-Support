@@ -10,6 +10,7 @@ import pkg from "../../package.json";
 import { reloadAccounts } from "../modules/auth/AccountUtil";
 import { prepareAJ } from "../modules/auth/AJHelper";
 import { prepareND } from "../modules/auth/NDHelper";
+import { initBoticorn } from "../modules/boticorn/Driver";
 import {
   getBoolean,
   getNumber,
@@ -39,6 +40,7 @@ import { loadServers } from "../modules/server/ServerFiles";
 import { App } from "./App";
 import { completeFirstRun } from "./FirstRunSetup";
 import { InstructionProvider } from "./Instruction";
+import { startCadanceProc } from "./linkage/Cadance";
 import { submitInfo, submitWarn } from "./Message";
 import { initWorker } from "./Schedule";
 import { initStatistics } from "./Statistics";
@@ -91,8 +93,11 @@ try {
   }
   printScreen("Log system enabled.");
   console.log(`Alicorn ${pkg.appVersion} Renderer Process`);
-  console.log("❤ From Annie K Rarity Sparklight");
-  console.log("Sparklight is a girl - a filly, to be accurate.");
+  console.log("%c❤ From Annie K Rarity Sparklight", "color:#df307f");
+  console.log(
+    "%cSparklight is a girl - a filly, to be accurate.",
+    "color:#df307f"
+  );
   console.log(
     "Alicorn Launcher Copyright (C) 2021-2022 Annie K Rarity Sparklight"
   );
@@ -199,6 +204,9 @@ try {
     ]);
     void completeFirstRun(); // Not blocking
     void todayPing();
+    void startCadanceProc();
+    void initBoticorn();
+
     // Heavy works and minor works
     await Promise.allSettled([initVF(), preCacheJavaInfo()]);
     const t2 = new Date();
