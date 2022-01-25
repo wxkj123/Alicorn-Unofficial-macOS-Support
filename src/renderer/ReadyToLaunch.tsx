@@ -44,6 +44,7 @@ import {
 import { makeStyles } from "@mui/styles";
 import copy from "copy-to-clipboard";
 import EventEmitter from "events";
+import os from "os";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { Account } from "../modules/auth/Account";
@@ -349,6 +350,7 @@ function Launching(props: {
   const [openLanWindow, setOpenLanWindow] = useState(false);
   const [openLanButtonEnabled, setOpenLanButtonEnabled] = useState(false);
   const [dry, setDry] = useState(false);
+  const [secure, setSecure] = useState(false);
   const profileHash = useRef<string>(
     props.container.id + "/" + props.profile.id
   );
@@ -417,6 +419,9 @@ function Launching(props: {
   }, []);
   useEffect(() => {
     mountedBit.current = true;
+    return () => {
+      mountedBit.current = false;
+    };
   }, []);
   useEffect(() => {
     const fun = () => {
@@ -456,7 +461,8 @@ function Launching(props: {
               (id) => {
                 setProfileRelatedID(profileHash.current, id);
               },
-              dry
+              dry,
+              secure
             );
           })();
         }}
@@ -592,7 +598,8 @@ function Launching(props: {
                       (id) => {
                         setProfileRelatedID(profileHash.current, id);
                       },
-                      dry
+                      dry,
+                      secure
                     );
                   } else {
                     setSelecting(true);
@@ -645,8 +652,28 @@ function Launching(props: {
           }
         />
       </Tooltip>
+      <Tooltip title={tr("ReadyToLaunch.SecureLaunchDesc")}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              color={"primary"}
+              disabled={status !== "Pending"}
+              checked={secure}
+              onChange={(e) => {
+                setSecure(e.target.checked);
+              }}
+            />
+          }
+          label={
+            <Typography color={"primary"}>
+              {tr("ReadyToLaunch.SecureLaunch")}
+            </Typography>
+          }
+        />
+      </Tooltip>
       <br />
       <SpecialKnowledge />
+      <SystemUsage />
       <OpenWorldDialog
         open={openLanWindow}
         baseVersion={props.profile.baseVersion}
@@ -675,7 +702,8 @@ async function startBoot(
   account: Account,
   server?: string,
   setRunID: (id: string) => unknown = () => {},
-  dry = false
+  dry = false,
+  secure = false
 ): Promise<LaunchTracker> {
   // @ts-ignore
   window[LAST_FAILURE_INFO_KEY] = undefined;
@@ -695,8 +723,8 @@ async function startBoot(
   if (account.type === AccountType.MICROSOFT) {
     // @ts-ignore
     // if (!window[SESSION_ACCESSDATA_CACHED_KEY]) {
-    if (!isReboot(profileHash)) {
-      if (!(await waitMSAccountReady())) {
+    if (secure || !isReboot(profileHash)) {
+      if (secure || !(await waitMSAccountReady())) {
         // If not reboot then validate
         if (!(await account.isAccessTokenValid())) {
           // Check if the access token is valid
@@ -736,7 +764,10 @@ async function startBoot(
   let ndServerId = "";
 
   // Setup skin if configured
-  if (account.type === AccountType.ALICORN) {
+  if (
+    account.type === AccountType.ALICORN &&
+    getBoolean("features.local-skin")
+  ) {
     try {
       const skin = await skinTypeFor(account);
 
@@ -778,8 +809,8 @@ async function startBoot(
       resolutionPolicy = true;
     }
   }
-  const safe = shouldSafeLaunch(container.id, profile.id);
-  if (!isReboot(profileHash)) {
+  const safe = secure || shouldSafeLaunch(container.id, profile.id);
+  if (secure || !isReboot(profileHash)) {
     NEED_QUERY_STATUS = true;
     setStatus(LaunchingStatus.FILES_FILLING);
     let st = false;
@@ -1754,5 +1785,68 @@ function AskURLDialog(): JSX.Element {
         </DialogActions>
       </Dialog>
     </ThemeProvider>
+  );
+}
+
+function SystemUsage(): JSX.Element {
+  const [mem, setMem] = useState(os.freemem());
+  const [totalMem, setTotalMem] = useState(os.totalmem());
+  const [loadAverage, setLoadAverage] = useState(os.loadavg()[0]);
+  const cpus = os.cpus().length;
+  useEffect(() => {
+    const fun = () => {
+      setMem(os.freemem());
+      setTotalMem(os.totalmem());
+      setLoadAverage(os.loadavg()[0]);
+    };
+    const t = setInterval(fun, 1000);
+    return () => {
+      clearInterval(t);
+    };
+  }, []);
+  return (
+    <>
+      <Box
+        sx={{ display: "flex", flexDirection: "row", alignItems: "baseline" }}
+      >
+        <Box
+          sx={{
+            marginTop: "2rem",
+            height: "0.2rem",
+            width: `${(1 - mem / totalMem) * 100}%`,
+            backgroundColor: "primary.main",
+          }}
+        />
+        <Typography
+          color={"primary"}
+          sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+        >
+          &nbsp;
+          {tr(
+            "ReadyToLaunch.RAM",
+            `Total=${Math.round((totalMem * 100) / 1073741824) / 100}`,
+            `InUse=${Math.round(((totalMem - mem) * 100) / 1073741824) / 100}`
+          )}
+        </Typography>
+      </Box>
+      <Box
+        sx={{ display: "flex", flexDirection: "row", alignItems: "baseline" }}
+      >
+        <Box
+          sx={{
+            height: "0.2rem",
+            width: `${(loadAverage / cpus) * 100}%`,
+            backgroundColor: "secondary.main",
+          }}
+        />
+        <Typography
+          color={"secondary"}
+          sx={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+        >
+          &nbsp;
+          {tr("ReadyToLaunch.CPU", `Total=${cpus}`, `Load=${loadAverage}`)}
+        </Typography>
+      </Box>
+    </>
   );
 }
