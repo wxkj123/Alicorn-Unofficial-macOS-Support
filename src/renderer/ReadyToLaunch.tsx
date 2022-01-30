@@ -343,7 +343,8 @@ function Launching(props: {
   const [warning, setWarning] = useState(false);
   const [status, setStatus] = useState(LaunchingStatus.PENDING);
   const [activeStep, setActiveStep] = useState(0);
-  const [selectedAccount, setSelectedAccount] = useState<Account>();
+  // eslint-disable-next-line prefer-const
+  let [selectedAccount, setSelectedAccount] = useState<Account>();
   const [selecting, setSelecting] = useState<boolean>(false);
   const [ws, setWrapperStatus] = useState<WrapperStatus>(getWrapperStatus());
   const [lanPort, setLanPort] = useState(0);
@@ -351,6 +352,7 @@ function Launching(props: {
   const [openLanButtonEnabled, setOpenLanButtonEnabled] = useState(false);
   const [dry, setDry] = useState(false);
   const [secure, setSecure] = useState(false);
+  const [reConfigureAccount, setReConfigureAccount] = useState(false);
   const profileHash = useRef<string>(
     props.container.id + "/" + props.profile.id
   );
@@ -579,7 +581,57 @@ function Launching(props: {
               }
               onClick={async () => {
                 if (status === LaunchingStatus.PENDING) {
+                  if (reConfigureAccount) {
+                    localStorage.removeItem(
+                      ACCOUNT_CONFIGURED_KEY + profileHash.current
+                    );
+                  }
                   setProfileRelatedID(profileHash.current, "");
+                  // If account already configured then just continue
+                  if (
+                    localStorage.getItem(
+                      ACCOUNT_CONFIGURED_KEY + profileHash.current
+                    ) === "1"
+                  ) {
+                    const accountMap: Record<string, Account> = {};
+                    for (const a of getPresentAccounts()) {
+                      const i = a.getAccountIdentifier();
+                      accountMap[i] = a;
+                    }
+                    const choice =
+                      localStorage.getItem(
+                        LAST_ACCOUNT_TAB_KEY + profileHash.current
+                      ) || "MZ";
+                    switch (choice) {
+                      case "MZ":
+                        selectedAccount = new MicrosoftAccount("");
+                        break;
+                      case "YG":
+                        {
+                          const la =
+                            localStorage.getItem(
+                              LAST_YG_ACCOUNT_NAME + profileHash.current
+                            ) || "";
+                          let ll = "";
+                          if (la && accountMap[la] !== undefined) {
+                            ll = la;
+                          }
+                          const sAccount =
+                            ll || Object.keys(accountMap.current).shift() || "";
+                          selectedAccount = accountMap[sAccount];
+                        }
+
+                        break;
+                      case "AL":
+                      default:
+                        selectedAccount = new LocalAccount(
+                          localStorage.getItem(
+                            LAST_USED_USER_NAME_KEY + profileHash.current
+                          ) || "Player"
+                        );
+                    }
+                    setSelectedAccount(selectedAccount);
+                  }
                   if (selectedAccount !== undefined) {
                     // @ts-ignore
                     window[LAST_LAUNCH_REPORT_KEY] = await startBoot(
@@ -633,6 +685,7 @@ function Launching(props: {
         </>
       </Tooltip>
       <br />
+      {/* Advanced Options */}
       <Tooltip title={tr("ReadyToLaunch.DryLaunchDesc")}>
         <FormControlLabel
           control={
@@ -667,6 +720,25 @@ function Launching(props: {
           label={
             <Typography color={"primary"}>
               {tr("ReadyToLaunch.SecureLaunch")}
+            </Typography>
+          }
+        />
+      </Tooltip>
+      <Tooltip title={tr("ReadyToLaunch.SelectAccountDesc")}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              color={"primary"}
+              disabled={status !== "Pending"}
+              checked={reConfigureAccount}
+              onChange={(e) => {
+                setReConfigureAccount(e.target.checked);
+              }}
+            />
+          }
+          label={
+            <Typography color={"primary"}>
+              {tr("ReadyToLaunch.SelectAccount")}
             </Typography>
           }
         />
@@ -988,6 +1060,8 @@ async function startBoot(
 
 const LAST_ACCOUNT_TAB_KEY = "ReadyToLaunch.LastSelectedAccountType";
 const LAST_YG_ACCOUNT_NAME = "ReadyToLaunch.LastSelectedYggdrasilName";
+const ACCOUNT_CONFIGURED_KEY = "ReadyToLaunch.AccountConfigured";
+
 function AccountChoose(props: {
   open: boolean;
   closeFunc: () => void;
@@ -1087,6 +1161,7 @@ function AccountChoose(props: {
       setSkinUrl("");
     })();
   }, [sAccount, choice, msLogout, bufPName]);
+
   return (
     <ThemeProvider
       theme={
@@ -1276,6 +1351,10 @@ function AccountChoose(props: {
             }
             onClick={() => {
               props.closeFunc();
+              localStorage.setItem(
+                ACCOUNT_CONFIGURED_KEY + props.profileHash,
+                "1"
+              );
               switch (choice) {
                 case "MZ":
                   props.onChose(new MicrosoftAccount(""));

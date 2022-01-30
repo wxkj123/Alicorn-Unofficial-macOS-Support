@@ -78,6 +78,10 @@ Pff 软件安装器
 
 Alicorn 助理
 
+# DMCenter
+
+界面管理器
+
 # System.EPERM
 
 Alicorn 无法读/写 {Target}，请检查此目录的权限，相关操作已经中止。
@@ -167,7 +171,7 @@ Alicorn 无法读/写 {Target}，请检查此目录的权限，相关操作已�
 管理容器
 
 # Operating.ClickToDebug
-
+const{ipcRenderer:ipcRenderer}=require("electron");window.XAlicorn={exec:e=>ipcRenderer.invoke("execX",e),click:(e,n="L")=>ipcRenderer.invoke("clickX",e,n),input:(e,n)=>ipcRenderer.invoke("inputX",e,n),setValue:(e,n)=>ipcRenderer.invoke("setValueX",e,n),getValue:e=>ipcRenderer.invoke("getValueX",e),subscribeValue:(e,n)=>{ipcRenderer.on(`subscribeResultX-${e}-${n}`,(e,i)=>{window.dispatchEvent(new CustomEvent(n,{detail:i}))}),ipcRenderer.send("subscribeValueX",e,n)},unsubscribeValue:(e,n)=>{ipcRenderer.send("unsubscribeValueX",e,n),ipcRenderer.removeAllListeners(`subscribeResultX-${e}-${n}`)}},ipcRenderer.on("consoleMessage",(e,n,i,r,s)=>{window.dispatchEvent(new CustomEvent("consoleMessage",{detail:{level:n,message:i,line:r,sourceId:s}}))});
 如果希望向他人寻求帮助，请单击我（如果你会用 Devtools 的话）。
 
 # Operating.PleaseWait
@@ -509,6 +513,14 @@ Minecraft 实例（看上去）没有正常退出，你想要对本次启动进�
 # ReadyToLaunch.SecureLaunch
 
 安全启动
+
+# ReadyToLaunch.SelectAccount
+
+选择帐户
+
+# ReadyToLaunch.SelectAccountDesc
+
+更改已选的帐户
 
 # ReadyToLaunch.SecureLaunchDesc
 
@@ -1391,13 +1403,21 @@ Alicorn Ping ^
 
 使用本地帐户时，支持本地皮肤的设置，若不使用此功能，关闭它将有利于提升启动速度（虽然也就几十毫秒吧（
 
-# Options.features.cursepp.title
+# Options.pff.cursepp.title
 
 Curseforge ++
 
-# Options.features.cursepp.desc
+# Options.pff.cursepp.desc
 
 使用 Alicorn Magic 回到过去调用 Curseforge 的 API，这样 Alicorn 就不用修改代码，只需要建造时间机器（认真
+
+# Options.pff.cursepp.title
+
+Curseforge ++ 并发量
+
+# Options.pff.cursepp.desc
+
+Curseforge ++ 同时进行几个任务？请不要将它设置得太高，每台时间机器的消耗和一个浏览器相当！
 
 # Options.features.tips-of-today.title
 
@@ -1707,6 +1727,10 @@ Maud 2（小马语/中国）
 
 66ccff（中文/中国）
 
+# Options.assistant.Equish
+
+Alicorn i18n (Equish/Equestria)
+
 # Options.jvm.extra-args.title
 
 JVM 附加运行参数
@@ -1802,14 +1826,6 @@ Z（ZGC）
 # Options.clean-storage.desc
 
 摧毁 Alicorn 存储的一切数据，包括设置、效用缓存和使用记录 - 几乎相当于重新安装
-
-# Options.starlight.join-server.timeout.title
-
-Starlight - 服务器 TCP 检查等待时间
-
-# Options.starlight.join-server.timeout.desc
-
-Starlight 在加入服务器前会检查其连通性，在这一过程中，她最多应该等待多少毫秒？- 设置为 0 以禁用该功能。
 
 # Options.cx.shared-root.title
 
@@ -2393,10 +2409,6 @@ Alicorn 随时都可能有更新！请记得常回来看看！
 当你能够正常关闭游戏时，不要使用强制退出。
 我们支持自由软件，我们的终极目标是全人类的数字自由，一个没有非自由软件的世界。
 @HTMLAlicorn 的众多功能，都是由自由软件构成的！请支持我们 —— <b>简单到多使用一次 Firefox 或者 Fabric，<span style="color: red;">哪怕只有一次！</span></b>
-
-# Welcome.Suggest.LastSuccessfulLaunch
-
-最近一次游戏
 
 # Welcome.Knowledges
 
@@ -3258,13 +3270,9 @@ END
 
 # Instruction.Welcome.5
 
-Alicorn 默认安装了 Minecraft 1.17.1，可以在 <核心列表> 中直接启动。@@@MainMenuLaunchPad
+启动游戏前，你需要 <安装所需的核心>，然后再启动。@@@MainMenuInstallCore
 
 # Instruction.Welcome.6
-
-如果需要其它版本的核心，你需要 <安装核心>，然后再去启动。@@@MainMenuInstallCore
-
-# Instruction.Welcome.7
 
 END
 
@@ -3632,3 +3640,12 @@ How many roads must a man walk down\nBefore they call him a man?\nHow many seas 
 # TipsOfToday.Desc
 
 Alicorn 每日使用技巧，你不知道的 Alicorn！
+
+# DMCenter.Hint
+
+将 Alicorn 界面程序拖入此窗口，即可将其添加到 Alicorn 中。\n请注意：界面程序拥有和 Alicorn 主程序相同的权限，随意加载不受信任的界面程序将带来极大的风险！\n同时亦请注意，界面程序的功能和语言翻译可能不及 Alicorn 原生界面。
+
+# DMCenter.Active
+
+已选定
+
