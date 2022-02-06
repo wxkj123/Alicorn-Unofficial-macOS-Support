@@ -341,7 +341,7 @@ export function toReadableType(t: AccountType): string {
 }
 
 // Method updateAccount will only be called if success
-function YggdrasilForm(props: {
+export function YggdrasilForm(props: {
   onClose: () => unknown;
   open: boolean;
   account: Account | undefined;
@@ -481,6 +481,7 @@ function AddAccount(props: {
                 setIsCustom(e.target.checked);
                 if (!e.target.checked) {
                   setNide(false);
+                  setAuthHost("");
                 }
               }}
             />

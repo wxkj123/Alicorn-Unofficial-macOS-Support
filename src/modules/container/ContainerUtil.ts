@@ -1,7 +1,7 @@
 import { invokeWorker, schedulePromiseTask } from "../../renderer/Schedule";
 import { ALICORN_DATA_SUFFIX } from "../commons/Constants";
 import { buildMap, parseMap } from "../commons/MapUtil";
-import { loadData, saveData, saveDataSync } from "../config/DataSupport";
+import { loadData, saveData } from "../config/DataSupport";
 import { MinecraftContainer } from "./MinecraftContainer";
 
 let GlobalContainerDescriptorTable: Map<string, string> = new Map();
@@ -91,12 +91,6 @@ export async function loadGDT(): Promise<void> {
   GlobalMountDescriptorTable = parseMap(await loadData(GMT_NAME));
   GlobalContainerDescriptorTable = parseMap(await loadData(GDT_NAME));
   syncGDTGMT();
-}
-
-export function saveGDTSync(): void {
-  syncGDTGMT();
-  saveDataSync(GMT_NAME, buildMap(GlobalMountDescriptorTable));
-  saveDataSync(GDT_NAME, buildMap(GlobalContainerDescriptorTable));
 }
 
 export async function saveGDT(): Promise<void> {

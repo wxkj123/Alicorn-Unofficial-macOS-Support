@@ -34,6 +34,7 @@ import { setupMSAccountRefreshService } from "../modules/readyboom/AccountMaster
 import { setupHotProfilesService } from "../modules/readyboom/PrepareProfile";
 import { initEncrypt } from "../modules/security/Encrypt";
 import { getMachineUniqueID } from "../modules/security/Unique";
+import { updateWebEchos } from "../modules/selfupdate/Echo";
 import { todayPing } from "../modules/selfupdate/Ping";
 import { checkUpdate, initUpdator } from "../modules/selfupdate/Updator";
 import { loadServers } from "../modules/server/ServerFiles";
@@ -41,7 +42,7 @@ import { App } from "./App";
 import { completeFirstRun } from "./FirstRunSetup";
 import { InstructionProvider } from "./Instruction";
 import { startCadanceProc } from "./linkage/Cadance";
-import { submitInfo, submitWarn } from "./Message";
+import { submitError, submitInfo, submitWarn } from "./Message";
 import { initWorker } from "./Schedule";
 import { initStatistics } from "./Statistics";
 import { AL_THEMES } from "./ThemeColors";
@@ -74,7 +75,7 @@ try {
   const t0 = new Date();
   printScreen("Setting up error pop system...");
   window.addEventListener("unhandledrejection", (e) => {
-    ipcRenderer.send("SOS", e.reason);
+    submitError("ERR! " + e.reason);
     console.log(e);
     printScreen(e.reason);
     showLogs();
@@ -82,7 +83,7 @@ try {
   });
 
   window.addEventListener("error", (e) => {
-    ipcRenderer.send("SOS", e.message);
+    submitError("ERR! " + e.message);
     console.log(e);
     printScreen(e.message);
     showLogs();
@@ -248,6 +249,12 @@ try {
       }
     })();
 
+    if (getBoolean("features.echo")) {
+      setInterval(() => {
+        void updateWebEchos();
+      }, 600000);
+      void updateWebEchos();
+    }
     await Promise.allSettled([
       updPm,
       prefetchForgeManifest(),

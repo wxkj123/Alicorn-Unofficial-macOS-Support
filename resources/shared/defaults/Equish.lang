@@ -244,7 +244,7 @@ Forge Mods are supported.
 
 # CoreInfo.Introduction.Fabric
 
-Fabric Mod are supported.
+Fabric Mods are supported.
 
 # CoreInfo.Introduction.Installer
 
@@ -364,11 +364,15 @@ Hit: {Url}
 
 # ReadyToLaunch.Retry
 
-Retry: {Url}
+Ret: {Url}
+
+# ReadyToLaunch.Linked
+
+Lnk: {Url}
 
 # ReadyToLaunch.Ignored
 
-Ignored: {Url}
+Ign: {Url}
 
 # ReadyToLaunch.Got
 
@@ -376,7 +380,7 @@ Got: {Url}
 
 # ReadyToLaunch.Failed
 
-Failed: {Url}
+Err: {Url}
 
 # ReadyToLaunch.StartAuthTitle
 
@@ -388,15 +392,23 @@ Choose an authenticate method.
 
 # ReadyToLaunch.UseMZ
 
-Microsoft Account
+Microsoft
 
 # ReadyToLaunch.UseYG
 
-Yggdrasil Account
+Yggdrasil
 
 # ReadyToLaunch.UseAL
 
-Local Account
+Local
+
+# ReadyToLaunch.UseDM
+
+Demo
+
+# ReadyToLaunch.DemoDescription
+
+If you haven't purchased Minecraft yet, use demo mode to have a try.
 
 # ReadyToLaunch.Next
 
@@ -501,6 +513,14 @@ Select Account
 # ReadyToLaunch.SelectAccountDesc
 
 Select another account
+
+# ReadyToLaunch.NoValidate
+
+No Files Check
+
+# ReadyToLaunch.NoValidateDesc
+
+Some clients might need this to run well
 
 # ReadyToLaunch.DryLaunch
 
@@ -702,7 +722,7 @@ Click To See More
 
 # VersionView.Copyright
 
-The following are translation of the original text and should not be considered as an alternative. \n\nAlicorn Launcher is a free software. It's licensed under the GNU GENERAL PUBLIC LICENSE (Version 3.0 or later).\nCopyright (C) 2021-2022 Annie K Rarity Sparklight\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\nImaged in Alicorn is not a part of Alicorn. They are from Minecraft Wiki and are licensed under the CC BY-NC-SA 3.0 License.
+The following are translation of the original text and should not be considered as an alternative. \n\nAlicorn Launcher is a free software. It's licensed under the GNU GENERAL PUBLIC LICENSE (Version 3.0 or later).\nCopyright (C) 2021-2022 Annie K Rarity Sparklight\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\nImages in Alicorn are not a part of Alicorn. They are from Minecraft Wiki and are licensed under the CC BY-NC-SA 3.0 License.
 
 # VersionView.Privacy
 
@@ -1300,6 +1320,14 @@ Alicorn Ping ^
 
 Send completely anonymous pings to Alicorn server so that we can know how many users do we have.
 
+# Options.features.echo.title
+
+Echo
+
+# Options.features.echo.desc
+
+Enable echo.
+
 # Options.features.local-skin.title
 
 Local Skin Support
@@ -1316,11 +1344,11 @@ Curseforge ++
 
 Believe it or not, use a time machine to invoke the legacy Curseforge API.
 
-# Options.pff.cursepp.title
+# Options.pff.cursepp-cluster-size.title
 
 Curseforge ++ Multi Tasks
 
-# Options.pff.cursepp.desc
+# Options.pff.cursepp-cluster-size.desc
 
 How many tasks should Curseforge ++ run at the same time?
 
@@ -1467,6 +1495,10 @@ Faded Gray
 # Options.theme.NightLightDark
 
 Night
+
+# Options.theme.ClassicDark
+
+Classic Dark
 
 # Options.theme.Classic
 
@@ -1804,22 +1836,6 @@ My Secrets
 
 Do you Pinkie promise that you are not going to tell anypony?
 
-# Options.dev.f12.title
-
-F12 DevTools * ^
-
-# Options.dev.f12.desc
-
-Allow opening DevTools by pressing Ctrl + F12.
-
-# Options.hot-key.title
-
-Alicorn Hot Keys ^
-
-# Options.hot-key.desc
-
-Enable Alicorn hot keys.
-
 # Options.download.global-proxy.title
 
 Proxy ^
@@ -1859,14 +1875,6 @@ Alicorn/MCBBS Mirror Group
 # Options.download.mirror.none
 
 Mojang Origin
-
-# Options.dev.explicit-error-throw.title
-
-Explicitly Error Throw *
-
-# Options.dev.explicit-error-throw.desc
-
-Show a dialog when something go wrong.
 
 # Options.dev.title
 
@@ -2238,8 +2246,6 @@ What's happening?
 ['{Config:interactive.i-have-a-crush-on-al}'=='true']These two pony ears? They are cute? You want to have a touch?
 
 ['{Config:interactive.i-have-a-crush-on-al}'=='true']Yes, I can fly! (Wings open)
-
-['{Config:dev.f12}'=='true']You are going to give me an operation? Through DevTools?
 
 ['{Config:readyboom}'=='false']ReadyBoom is half of my speed!
 
@@ -3420,3 +3426,31 @@ Close
 # TipsOfToday.Desc
 
 Alicorn Tips Of Today!
+
+# DMCenter.Hint
+
+Drop Display Manager into Alicorn to add it to thus list.\nDO NOT add a DM you do not trust! This can be very DANGEROUS!
+
+# DMCenter.Active
+
+Active
+
+# Echo.Title
+
+Echo
+
+# Echo.Hint
+
+Write something...\n(Unfortunately, currently no ASCII characters are allowed.)
+
+# Echo.PlaceHolder
+
+I Can Eat Glass
+
+# Echo.Send
+
+Send
+
+# Echo.Format
+
+{Text} -- Alicorn Echo

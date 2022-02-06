@@ -1,4 +1,4 @@
-import { loadData, saveData, saveDataSync } from "../config/DataSupport";
+import { loadData, saveData } from "../config/DataSupport";
 
 const SERVERS: Set<string> = new Set();
 const SERVERS_NAME = "servers.csv";
@@ -18,9 +18,6 @@ export async function saveServers(): Promise<void> {
   try {
     await saveData(SERVERS_NAME, Array.from(SERVERS).join(","));
   } catch {}
-}
-export function saveServersSync(): void {
-  saveDataSync(SERVERS_NAME, Array.from(SERVERS).join(","));
 }
 
 export function getServerList(): string[] {
