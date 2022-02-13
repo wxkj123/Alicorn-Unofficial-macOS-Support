@@ -19,7 +19,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { scanCoresInAllMountedContainers } from "../modules/container/ContainerScanner";
 import { getContainer } from "../modules/container/ContainerUtil";
-import { isStillNeeded, loadProfile } from "../modules/profile/ProfileLoader";
+import {
+  isProfileIsolated,
+  isStillNeeded,
+  loadProfile,
+} from "../modules/profile/ProfileLoader";
 import { whatProfile } from "../modules/profile/WhatProfile";
 import { setDirtyProfile } from "../modules/readyboom/PrepareProfile";
 import { jumpTo, triggerSetPage } from "./GoTo";
@@ -38,6 +42,7 @@ interface SimplifiedCoreInfo {
   corrupted: boolean;
   versionType: string;
   baseVersion: string;
+  isolated: boolean;
 }
 
 export function LaunchPad(): JSX.Element {
@@ -49,6 +54,15 @@ export function LaunchPad(): JSX.Element {
       <CoresDisplay server={server} />
     </Box>
   );
+}
+
+function vcmp(v0: string, v1: string): number {
+  const v00 = v0.split(".")[1];
+  const v01 = v1.split(".")[1];
+  if (v00 === undefined || v01 === undefined) {
+    return 0;
+  }
+  return parseInt(v00) - parseInt(v01);
 }
 
 function CoresDisplay(props: { server?: string }): JSX.Element {
@@ -93,6 +107,7 @@ function CoresDisplay(props: { server?: string }): JSX.Element {
                 versionType: whatProfile(id),
                 corrupted: false,
                 container: c.id,
+                isolated: await isProfileIsolated(c, id),
               });
             } catch {
               if (!ignoreCorrupted.current) {
@@ -103,6 +118,7 @@ function CoresDisplay(props: { server?: string }): JSX.Element {
                   versionType: "???????",
                   baseVersion: "???????",
                   container: c.id,
+                  isolated: false,
                 });
               }
             } finally {
@@ -126,9 +142,9 @@ function CoresDisplay(props: { server?: string }): JSX.Element {
             const timeB = getMarkTime(hashB);
             switch (sorting) {
               case "LH":
-                return a.id < b.id ? -1 : 1;
+                return vcmp(a.id, b.id);
               case "HL":
-                return a.id < b.id ? 1 : -1;
+                return vcmp(b.id, a.id);
               case "USE":
                 return pinB - pinA;
               case "TIME":
@@ -374,7 +390,11 @@ function SingleCoreDisplay(props: {
                                     props.profile.baseVersion
                                   )}/${encodeURIComponent(
                                     props.profile.versionType
-                                  )}`
+                                  )}/${
+                                    props.profile.isolated
+                                      ? props.profile.id
+                                      : "0"
+                                  }`
                                 );
                                 triggerSetPage("PffFront");
                                 addStatistics("Click");
@@ -424,7 +444,11 @@ function SingleCoreDisplay(props: {
                               props.profile.container
                             )}/${encodeURIComponent(
                               props.profile.baseVersion
-                            )}/${encodeURIComponent(props.profile.versionType)}`
+                            )}/${encodeURIComponent(
+                              props.profile.versionType
+                            )}/${
+                              props.profile.isolated ? props.profile.id : "0"
+                            }`
                           );
                           triggerSetPage("PffFront");
                           addStatistics("Click");
@@ -480,6 +504,16 @@ function SingleCoreDisplay(props: {
             >
               {getDescriptionFor(props.profile.versionType)}
             </Typography>
+          )}
+          {props.profile.isolated ? (
+            <Typography
+              className={classes.text}
+              sx={{ color: isBgDark() ? "secondary.light" : undefined }}
+            >
+              {tr("CoreInfo.Isolated")}
+            </Typography>
+          ) : (
+            ""
           )}
         </CardContent>
         <YNDialog2

@@ -50,7 +50,6 @@ import { useParams } from "react-router";
 import { Account } from "../modules/auth/Account";
 import {
   AccountType,
-  fillAccessData,
   getPresentAccounts,
   querySkinFor,
 } from "../modules/auth/AccountUtil";
@@ -65,10 +64,11 @@ import {
   MS_LAST_USED_REFRESH_KEY,
   MS_LAST_USED_USERNAME_KEY,
   MS_LAST_USED_UUID_KEY,
+  MS_LAST_USED_XUID_KEY,
 } from "../modules/auth/MicrosoftAccount";
 import { Nide8Account } from "../modules/auth/Nide8Account";
 import { uniqueHash } from "../modules/commons/BasicHash";
-import { Pair, Trio } from "../modules/commons/Collections";
+import { Pair } from "../modules/commons/Collections";
 import {
   PROCESS_END_GATE,
   PROCESS_LOG_GATE,
@@ -116,7 +116,10 @@ import { LaunchTracker } from "../modules/launch/LaunchTracker";
 import { stopMinecraft } from "../modules/launch/MinecraftBootstrap";
 import { prepareModsCheckFor } from "../modules/modx/ModDynLoad";
 import { GameProfile } from "../modules/profile/GameProfile";
-import { loadProfile } from "../modules/profile/ProfileLoader";
+import {
+  isProfileIsolated,
+  loadProfile,
+} from "../modules/profile/ProfileLoader";
 import {
   dropAccountPromise,
   waitMSAccountReady,
@@ -819,7 +822,7 @@ async function startBoot(
     profile: profile,
   };
   setStatus(LaunchingStatus.ACCOUNT_AUTHING);
-  let acData = new Trio("", "", "");
+  let acData: [string, string, string, string] = ["", "", "", ""];
   if (account !== null) {
     if (account.type === AccountType.MICROSOFT) {
       // @ts-ignore
@@ -859,7 +862,7 @@ async function startBoot(
         }
       }
     }
-    acData = await fillAccessData(await account.buildAccessData());
+    acData = await account.buildAccessData();
   }
   let useAj = false;
   let ajHost = "";
@@ -925,7 +928,6 @@ async function startBoot(
       }
       if (!st) {
         // I shall do this
-        await ensureAssetsIndex(profile, container);
         await Promise.all([
           ensureClient(profile),
           ensureLog4jFile(profile, container),
@@ -934,6 +936,7 @@ async function startBoot(
             await ensureNatives(profile, container);
           })(),
           (async () => {
+            await ensureAssetsIndex(profile, container);
             await ensureAllAssets(profile, container, GLOBAL_LAUNCH_TRACKER);
           })(),
         ]); // Parallel
@@ -958,9 +961,13 @@ async function startBoot(
       });
     }
   }
+  const isolated = await isProfileIsolated(container, profile.id);
+
   setStatus(LaunchingStatus.MODS_PREPARING);
-  if (profile.type === ReleaseType.MODIFIED) {
-    await prepareModsCheckFor(profile, container, GLOBAL_LAUNCH_TRACKER);
+  if (!isolated) {
+    if (profile.type === ReleaseType.MODIFIED) {
+      await prepareModsCheckFor(profile, container, GLOBAL_LAUNCH_TRACKER);
+    }
   }
   setStatus(LaunchingStatus.ARGS_GENERATING);
   let jHome = getJavaAndCheckAvailable(profileHash, true);
@@ -1077,6 +1084,7 @@ async function startBoot(
       gc1: getString("main-gc", "z"),
       gc2: getString("para-gc", "pure"),
       demo: account === null,
+      isolated: isolated,
     });
   }
   addStatistics("Launch");
@@ -1346,6 +1354,7 @@ function AccountChoose(props: {
                     localStorage.setItem(MS_LAST_USED_ACTOKEN_KEY, "");
                     localStorage.setItem(MS_LAST_USED_UUID_KEY, "");
                     localStorage.setItem(MS_LAST_USED_USERNAME_KEY, "");
+                    localStorage.setItem(MS_LAST_USED_XUID_KEY, "");
                     localStorage.removeItem(ACCOUNT_EXPIRES_KEY); // Reset time
                     localStorage.removeItem(ACCOUNT_LAST_REFRESHED_KEY);
                     if (mounted.current) {

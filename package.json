@@ -2,7 +2,7 @@
   "private": true,
   "appVersion": "Harmony",
   "version": "1.0.0",
-  "updatorVersion": 46,
+  "updatorVersion": 47,
   "scripts": {
     "lc": "yarn lcd",
     "df": "yarn dev-full",
@@ -29,7 +29,7 @@
     "rmx": "rm -rf node_modules/@types/react-router/node_modules node_modules/@types/react-transition-group/node_modules node_modules/@types/react-dom/node_modules node_modules/@types/react-router-dom/node_modules node_modules/@types/react-is/node_modules"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.0",
+    "@babel/core": "^7.17.2",
     "@types/crypto-js": "^4.1.0",
     "@types/fs-extra": "^9.0.13",
     "@types/js-levenshtein": "^1.1.1",
@@ -43,12 +43,12 @@
     "@types/tunnel": "^0.0.3",
     "@types/uuid": "^8.3.4",
     "@types/ws": "^8.2.2",
-    "@typescript-eslint/eslint-plugin": "^5.10.2",
-    "@typescript-eslint/parser": "^5.10.2",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
     "copy-webpack-plugin": "^10.2.4",
     "electron": "^17.0.0",
     "electron-packager": "^15.4.0",
-    "eslint": "8.8.0",
+    "eslint": "8.9.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
@@ -64,9 +64,9 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@mui/icons-material": "^5.3.1",
-    "@mui/material": "^5.4.0",
-    "@mui/styles": "^5.3.0",
+    "@mui/icons-material": "^5.4.1",
+    "@mui/material": "^5.4.1",
+    "@mui/styles": "^5.4.1",
     "ajv": "^8.10.0",
     "cheerio": "^1.0.0-rc.10",
     "compressing": "^1.5.1",
@@ -91,8 +91,8 @@
     "sudo-prompt": "^9.2.1",
     "throttle-debounce": "^3.0.1",
     "toml": "^3.0.0",
-    "undici": "^4.13.0",
+    "undici": "^4.14.1",
     "uuid": "^8.3.2",
-    "ws": "^8.4.2"
+    "ws": "^8.5.0"
   }
 }

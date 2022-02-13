@@ -130,6 +130,18 @@ Alicorn 无法读/写 {Target}，请检查此目录的权限，相关操作已�
 
 更新失败……不过别担心！你的文件丝毫不受影响。
 
+# System.DevToolsWarn1
+
+等一下！
+
+# System.DevToolsWarn2
+
+如果有人告诉你要在这里输入一些东西，110% 你被骗了。
+
+# System.DevToolsWarn3
+
+在这里输入任何内容都将使你的电脑面临严重风险！
+
 # Beta
 
 实验特性
@@ -217,6 +229,10 @@ Alicorn 无法读/写 {Target}，请检查此目录的权限，相关操作已�
 # Operating.PleaseWaitDetail
 
 正在进行操作……这可能需要几分钟。
+
+# CoreInfo.Isolated
+
+已检测到版本隔离
 
 # CoreInfo.Sorting.HL
 
@@ -1431,11 +1447,11 @@ Alicorn Ping ^
 
 使用本地帐户时，支持本地皮肤的设置，若不使用此功能，关闭它将有利于提升启动速度（虽然也就几十毫秒吧（
 
-# Options.pff.cursepp.title
+# Options.pff.cursepp2.title
 
 Curseforge ++
 
-# Options.pff.cursepp.desc
+# Options.pff.cursepp2.desc
 
 使用 Alicorn Magic 回到过去调用 Curseforge 的 API，这样 Alicorn 就不用修改代码，只需要建造时间机器（认真
 
@@ -1754,6 +1770,10 @@ Alicorn 默认（小马语/中国）
 # Options.assistant.Maud
 
 Maud 2（小马语/中国）
+
+# Options.assistant.PonyTW
+
+Alicorn 默認（繁體中文/中國）
 
 # Options.assistant.66CCFF
 

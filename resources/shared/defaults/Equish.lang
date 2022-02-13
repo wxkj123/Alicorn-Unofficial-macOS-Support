@@ -126,6 +126,18 @@ Yeah! I'm brand new now!
 
 Update failed, but don't worry, files are still safe.
 
+# System.DevToolsWarn1
+
+Hold On!
+
+# System.DevToolsWarn2
+
+If someone told you to enter something here, 11 out of 10 you're fooled.
+
+# System.DevToolsWarn3
+
+You are taking SEVERE SAFETY RISKS when entering anything here!
+
 # Beta
 
 Beta
@@ -205,6 +217,10 @@ Easy, easy...
 # Operating.PleaseWaitDetail
 
 In progress... This might take some minutes.
+
+# CoreInfo.Isolated
+
+Context Isolation Detected
 
 # CoreInfo.Sorting.HL
 
@@ -1336,11 +1352,11 @@ Local Skin Support
 
 Enable local skin support for local account.
 
-# Options.pff.cursepp.title
+# Options.pff.cursepp2.title
 
 Curseforge ++
 
-# Options.pff.cursepp.desc
+# Options.pff.cursepp2.desc
 
 Believe it or not, use a time machine to invoke the legacy Curseforge API.
 
@@ -1655,6 +1671,10 @@ Animate when navigating.
 # Options.assistant.PonyCN
 
 Alicorn 默认（小马语/中国）
+
+# Options.assistant.PonyTW
+
+Alicorn 默認（繁體中文/中國）
 
 # Options.assistant.Maud
 
